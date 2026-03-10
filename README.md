@@ -1,24 +1,24 @@
 <div align="center">
 
-<img src="Sources/ClashBar/Resources/Brand/clashbar-icon.png" width="300" alt="ClashBar Logo" />
+<img src="Sources/ClashBar/Resources/Brand/menu_icon.png" width="300" alt="SBar Logo" />
 
-# ClashBar
+# SBar
 
-原生 macOS 菜单栏代理客户端（SwiftUI + AppKit），以 `mihomo` 为 Core。
+原生 macOS 菜单栏代理客户端（SwiftUI + AppKit），支持 `sing-box` / `mihomo` Core，默认推荐 `sing-box`。
 
 <p>
   <img alt="Platform" src="https://img.shields.io/badge/macOS-14%2B-111111?style=flat-square&logo=apple" />
   <img alt="Swift" src="https://img.shields.io/badge/Swift-6.2-F05138?style=flat-square&logo=swift" />
   <img alt="Build" src="https://img.shields.io/badge/Build-SwiftPM-0A84FF?style=flat-square" />
   <img alt="i18n" src="https://img.shields.io/badge/i18n-zh--Hans%20%7C%20en-34C759?style=flat-square" />
-  <a href="https://github.com/Sitoi/ClashBar/releases" target="_blank" rel="noopener noreferrer">
-    <img alt="Version" src="https://img.shields.io/github/v/release/Sitoi/ClashBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SBar/releases" target="_blank" rel="noopener noreferrer">
+    <img alt="Version" src="https://img.shields.io/github/v/release/n-WN/SBar?style=flat-square&logo=github" />
   </a>
-  <a href="https://github.com/Sitoi/ClashBar/stargazers" target="_blank" rel="noopener noreferrer">
-    <img alt="Stars" src="https://img.shields.io/github/stars/Sitoi/ClashBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SBar/stargazers" target="_blank" rel="noopener noreferrer">
+    <img alt="Stars" src="https://img.shields.io/github/stars/n-WN/SBar?style=flat-square&logo=github" />
   </a>
-  <a href="https://github.com/Sitoi/ClashBar/issues" target="_blank" rel="noopener noreferrer">
-    <img alt="Issues" src="https://img.shields.io/github/issues/Sitoi/ClashBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SBar/issues" target="_blank" rel="noopener noreferrer">
+    <img alt="Issues" src="https://img.shields.io/github/issues/n-WN/SBar?style=flat-square&logo=github" />
   </a>
   <a href="https://t.me/clashbars" target="_blank" rel="noopener noreferrer">
     <img alt="Telegram" src="https://img.shields.io/badge/Telegram-@clashbars-26A5E4?style=flat-square&logo=telegram&logoColor=white" />
@@ -32,25 +32,25 @@
 
 </div>
 
-![ClashBar](./imgs/clashbar.svg)
+![SBar](./imgs/sbar.png)
 
 ---
 
 ## 👋 项目简介
 
-ClashBar 是一款面向 macOS 的原生菜单栏代理客户端，基于 `mihomo` Core，聚焦于「轻量入口、稳定运行、可观测运维」。  
+SBar 是一款面向 macOS 的原生菜单栏代理客户端，支持 `sing-box` / `mihomo` Core，聚焦于「轻量入口、稳定运行、可观测运维」。  
 在不打开复杂主窗口的前提下，你可以在菜单栏中完成配置管理、节点切换、规则刷新、连接排障与系统代理控制。 ✨
 
 ## 🤖 项目说明
 
-ClashBar 是一个「纯 AI vibe coding」驱动的自用项目。  
+SBar 是一个「纯 AI vibe coding」驱动的自用项目。  
 项目在需求整理、实现迭代、文档维护等环节持续与 Codex 协作，以更快验证想法并沉淀可复用实践。 🚀
 
 ## 🎯 项目初心
 
-ClashBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
+SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
-- 🪶 轻量化优先：在打包 `mihomo` Core 的前提下，应用体积目标控制在 **40 MB 以内**。
+- 🪶 轻量化优先：在打包 Core 的前提下，应用体积目标控制在 **40 MB 以内**。
 - 📦 可裁剪交付：移除 Core 后，应用体积目标控制在 **10 MB 以内**，便于快速分发与集成。
 - 🛡️ 稳定性优先：优先保证日常可用性与长期运行稳定，避免为短期功能堆叠牺牲可靠性。
 
@@ -58,9 +58,9 @@ ClashBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**�
 
 ![APP Size](./imgs/appsize.svg)
 
-| 客户端          | 应用体积 | 相对 ClashBar |
+| 客户端          | 应用体积 | 相对 SBar |
 | --------------- | -------: | ------------: |
-| ClashBar.app    |  37.5 MB |          1.0x |
+| SBar.app        |  37.5 MB |          1.0x |
 | ClashMac.app    |  75.2 MB |          2.0x |
 | Clash Verge.app | 128.4 MB |          3.4x |
 | Clash Party.app | 496.7 MB |         13.2x |
@@ -82,7 +82,7 @@ ClashBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**�
 
 ## 🚀 快速上手（用户）
 
-1. 点击菜单栏图标打开 ClashBar 面板。 🖱️
+1. 点击菜单栏图标打开 SBar 面板。 🖱️
 2. 在 `Proxy` 页面选择配置，或导入本地/远程配置。 📥
 3. 点击 `Start` 启动 Core，必要时执行 `Restart`。 ▶️
 4. 选择代理模式：`Rule` / `Global` / `Direct`。 🎛️
@@ -110,6 +110,9 @@ ClashBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**�
 
 - `~/Library/Application Support/clashbar`
 
+> [!NOTE]
+> 当前为兼容历史版本，运行时目录仍沿用 `clashbar` 命名，后续会在迁移方案明确后再调整。
+
 目录结构与职责：
 
 | 路径      | 作用                                               | 管理建议                         |
@@ -126,21 +129,21 @@ ClashBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**�
 - 未手动指定时，默认选中首个配置
 
 > [!TIP]
-> 建议只对 `config/` 做日常维护，其余目录优先交由 ClashBar 管理，以降低运行状态不一致风险。
+> 建议只对 `config/` 做日常维护，其余目录优先交由 SBar 管理，以降低运行状态不一致风险。
 
 ## 🔄 内核目录与切换
 
 运行时内核路径：
 
-- `~/Library/Application Support/clashbar/core/mihomo`
+- `~/Library/Application Support/clashbar/core`
 
-首次启动会将应用内置内核复制到上述目录。后续运行统一使用该路径，避免改写已签名的 app bundle。
+如果你使用的是「内置 Core」版本，首次启动会将应用内置 Core 复制到上述目录。后续运行统一使用该路径，避免改写已签名的 app bundle。
 
 切换内核步骤：
 
-1. 在 ClashBar 中执行 `Stop`，确保当前内核进程已停止。
-2. 准备目标内核可执行文件（如 `mihomo`，命名需要保存一致）。
-3. 返回 ClashBar，执行 `Start` 或 `Restart`。
+1. 在 SBar 中执行 `Stop`，确保当前内核进程已停止。
+2. 准备目标内核可执行文件（如 `sing-box` / `mihomo`，命名需要保持一致）。
+3. 返回 SBar，执行 `Start` 或 `Restart`。
 
 异常处理：
 
@@ -161,12 +164,12 @@ rm -f "$HOME/Library/Application Support/clashbar/cache.db"
 
 **处理步骤**
 
-1. 将应用放置到 `/Applications/ClashBar.app`。
+1. 将应用放置到 `/Applications/SBar.app`。
 2. 打开 **系统设置 → 隐私与安全性**，点击「仍要打开（Open Anyway）」。
 3. 若仍被拦截，可移除隔离标记后重试：
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/ClashBar.app
+sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
 ```
 
 ### 2) 系统代理开启失败 ⚙️
@@ -177,7 +180,7 @@ sudo xattr -r -d com.apple.quarantine /Applications/ClashBar.app
 **处理步骤**
 
 1. 确认使用的是打包后的应用，并位于 `/Applications`。
-2. 在 macOS 系统设置中完成 ClashBar 相关权限批准。
+2. 在 macOS 系统设置中完成 SBar 相关权限批准。
 3. 回到应用执行一次 `Restart` Core 后再次开启系统代理。
 4. 如仍失败，打开 `Logs` 检查关键错误并提交 Issue。
 
@@ -223,16 +226,17 @@ sudo xattr -r -d com.apple.quarantine /Applications/ClashBar.app
 
 感谢所有参与贡献的开发者：
 
-[![Contributors](https://contrib.rocks/image?repo=Sitoi/ClashBar)](https://github.com/Sitoi/ClashBar/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=n-WN/SBar)](https://github.com/n-WN/SBar/graphs/contributors)
 
 ## 🙏 致谢
 
 - 感谢 [OpenAI Codex](https://openai.com/codex/) 在需求拆解、工程实现与文档优化中的持续协作。 🤝
 - 感谢 [MetaCubeX/mihomo](https://github.com/MetaCubeX/mihomo) 提供稳定可靠的 Core 能力。
+- 感谢 [SagerNet/sing-box](https://github.com/SagerNet/sing-box) 提供强大、开放的网络代理内核。
 
 ## ✨ Star 数
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Sitoi/ClashBar&type=date&legend=top-left)](https://www.star-history.com/#Sitoi/ClashBar&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=n-WN/SBar&type=date&legend=top-left)](https://www.star-history.com/#n-WN/SBar&type=date&legend=top-left)
 
 ## 📄 许可证
 
