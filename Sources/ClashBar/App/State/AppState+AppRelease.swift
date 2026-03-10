@@ -23,7 +23,7 @@ extension AppState {
     }
 
     var appReleaseIndexURL: URL? {
-        URL(string: "https://github.com/n-WN/SBar/releases")
+        URL(string: "https://github.com/n-WN/SingBar/releases")
     }
 
     func refreshLatestAppReleaseIfNeeded(force: Bool = false) async {

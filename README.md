@@ -11,14 +11,14 @@
   <img alt="Swift" src="https://img.shields.io/badge/Swift-6.2-F05138?style=flat-square&logo=swift" />
   <img alt="Build" src="https://img.shields.io/badge/Build-SwiftPM-0A84FF?style=flat-square" />
   <img alt="i18n" src="https://img.shields.io/badge/i18n-zh--Hans%20%7C%20en-34C759?style=flat-square" />
-  <a href="https://github.com/n-WN/SBar/releases" target="_blank" rel="noopener noreferrer">
-    <img alt="Version" src="https://img.shields.io/github/v/release/n-WN/SBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SingBar/releases" target="_blank" rel="noopener noreferrer">
+    <img alt="Version" src="https://img.shields.io/github/v/release/n-WN/SingBar?style=flat-square&logo=github" />
   </a>
-  <a href="https://github.com/n-WN/SBar/stargazers" target="_blank" rel="noopener noreferrer">
-    <img alt="Stars" src="https://img.shields.io/github/stars/n-WN/SBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SingBar/stargazers" target="_blank" rel="noopener noreferrer">
+    <img alt="Stars" src="https://img.shields.io/github/stars/n-WN/SingBar?style=flat-square&logo=github" />
   </a>
-  <a href="https://github.com/n-WN/SBar/issues" target="_blank" rel="noopener noreferrer">
-    <img alt="Issues" src="https://img.shields.io/github/issues/n-WN/SBar?style=flat-square&logo=github" />
+  <a href="https://github.com/n-WN/SingBar/issues" target="_blank" rel="noopener noreferrer">
+    <img alt="Issues" src="https://img.shields.io/github/issues/n-WN/SingBar?style=flat-square&logo=github" />
   </a>
   <!-- <a href="https://t.me/clashbars" target="_blank" rel="noopener noreferrer">
     <img alt="Telegram" src="https://img.shields.io/badge/Telegram-@clashbars-26A5E4?style=flat-square&logo=telegram&logoColor=white" />
@@ -226,7 +226,7 @@ sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
 
 感谢所有参与贡献的开发者：
 
-[![Contributors](https://contrib.rocks/image?repo=n-WN/SBar)](https://github.com/n-WN/SBar/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=n-WN/SingBar)](https://github.com/n-WN/SingBar/graphs/contributors)
 
 ## 🙏 致谢
 
@@ -236,7 +236,7 @@ sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
 
 ## ✨ Star 数
 
-[![Star History Chart](https://api.star-history.com/svg?repos=n-WN/SBar&type=date&legend=top-left)](https://www.star-history.com/#n-WN/SBar&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=n-WN/SingBar&type=date&legend=top-left)](https://www.star-history.com/#n-WN/SingBar&type=date&legend=top-left)
 
 ## 📄 许可证
 
