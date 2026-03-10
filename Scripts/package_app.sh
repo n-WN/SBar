@@ -14,11 +14,18 @@ PREPROCESSED_MIHOMO_PATH="${PREPROCESSED_MIHOMO_PATH:-$PREPROCESS_DIR/mihomo}"
 REQUIRE_MIHOMO_BINARY="${REQUIRE_MIHOMO_BINARY:-1}"
 BUNDLE_MIHOMO_BINARY="${BUNDLE_MIHOMO_BINARY:-1}"
 
-APP="$ROOT/dist/${APP_NAME}.app"
+DIST_DIR="$ROOT/dist"
+APP="$DIST_DIR/${APP_NAME}.app"
 HELPER_LABEL="com.clashbar.helper"
 HELPER_PLIST_SOURCE="$ROOT/Sources/Helper/LaunchDaemons/${HELPER_LABEL}.plist"
 
 cd "$ROOT"
+
+for stale_name in ClashBar SBar SingBar; do
+  if [ "$stale_name" != "$APP_NAME" ]; then
+    rm -rf "$DIST_DIR/${stale_name}.app"
+  fi
+done
 
 BUILD_ARGS=(-c release)
 if [ -n "$TARGET_ARCH" ]; then
