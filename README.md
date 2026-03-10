@@ -106,10 +106,11 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
 运行时根目录：
 
-- `~/Library/Application Support/clashbar`
+- `~/Library/Application Support/sbar`
 
-> [!NOTE]
-> 当前为兼容历史版本，运行时目录仍沿用 `clashbar` 命名，后续会在迁移方案明确后再调整。
+兼容旧版本（若检测到旧目录则继续使用）：
+
+- `~/Library/Application Support/clashbar`
 
 目录结构与职责：
 
@@ -118,11 +119,11 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 | `config/` | 存放用户配置文件（`.yaml` / `.yml`）与订阅导入结果 | 建议纳入备份；可手动维护文件命名 |
 | `logs/`   | 运行日志与排障信息输出目录                         | 排障完成后可按需清理             |
 | `state/`  | 应用运行状态与会话相关数据                         | 建议由程序维护，不建议手动编辑   |
-| `core/`   | 运行时 Core 二进制（如 `mihomo`）                  | 升级/替换前先停止 Core           |
+| `core/`   | 运行时 Core 二进制（如 `sing-box` / `mihomo`）     | 升级/替换前先停止 Core           |
 
 配置发现规则：
 
-- 仅识别 `.yaml` / `.yml` 文件
+- 识别 `.yaml` / `.yml` / `.json` 文件
 - 按文件名排序加载
 - 未手动指定时，默认选中首个配置
 
@@ -133,7 +134,7 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
 运行时内核路径：
 
-- `~/Library/Application Support/clashbar/core`
+- `~/Library/Application Support/sbar/core`
 
 如果你使用的是「内置 Core」版本，首次启动会将应用内置 Core 复制到上述目录。后续运行统一使用该路径，避免改写已签名的 app bundle。
 
@@ -148,6 +149,7 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 - 若切换后出现缓存兼容问题，可清理缓存后重试：
 
 ```bash
+rm -f "$HOME/Library/Application Support/sbar/cache.db"
 rm -f "$HOME/Library/Application Support/clashbar/cache.db"
 ```
 

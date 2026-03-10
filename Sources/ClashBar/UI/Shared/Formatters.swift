@@ -33,11 +33,11 @@ private final class TimestampCacheBox: @unchecked Sendable {
 }
 
 enum ValueFormatter {
-    private static let timestampFormatterKey = "clashbar.formatter.timestamp"
+    private static let timestampFormatterKey = "sbar.formatter.timestamp"
     private static let timestampCache = TimestampCacheBox()
 
-    private static let iso8601WithFractionalKey = "clashbar.formatter.iso8601.fractional"
-    private static let iso8601BasicKey = "clashbar.formatter.iso8601.basic"
+    private static let iso8601WithFractionalKey = "sbar.formatter.iso8601.fractional"
+    private static let iso8601BasicKey = "sbar.formatter.iso8601.basic"
 
     static func speed(_ value: Int64) -> String {
         let normalized = max(0, value)

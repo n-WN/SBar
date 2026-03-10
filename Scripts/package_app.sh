@@ -206,6 +206,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <key>CFBundleShortVersionString</key><string>${APP_VERSION}</string>
 <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
 $ICON_PLIST_ENTRY
+<key>SBarBundlesManagedCore</key>${BUNDLES_MIHOMO_CORE_PLIST_VALUE}
 <key>ClashBarBundlesMihomoCore</key>${BUNDLES_MIHOMO_CORE_PLIST_VALUE}
 <key>NSAppTransportSecurity</key>
 <dict>

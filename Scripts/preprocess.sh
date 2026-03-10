@@ -152,7 +152,7 @@ prepare_icon() {
 
   local iconset_work_dir
   local iconset_dir
-  iconset_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/clashbar.iconset.XXXXXX")"
+  iconset_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/sbar.iconset.XXXXXX")"
   iconset_dir="${iconset_work_dir}.iconset"
   mv "$iconset_work_dir" "$iconset_dir"
 

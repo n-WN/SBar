@@ -94,8 +94,14 @@ struct ClashBarApp: App {
 
 @MainActor
 final class ClashBarAppDelegate: NSObject, NSApplicationDelegate {
-    let appState = AppState()
+    let appState: AppState
     private var statusItemController: StatusItemController?
+
+    override init() {
+        AppDefaultsMigrator.migrateIfNeeded()
+        self.appState = AppState()
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let image = BrandIcon.image {

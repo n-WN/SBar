@@ -160,9 +160,9 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
         self.systemSingBoxLocator = systemSingBoxLocator
         self.configValidationTimeout = configValidationTimeout
         self.lifecycleQueue = lifecycleQueue
-            ?? DispatchQueue(label: "com.clashbar.mihomo-process.operations", qos: .userInitiated)
+            ?? DispatchQueue(label: "com.sbar.core-process.operations", qos: .userInitiated)
         self.validationQueue = validationQueue
-            ?? DispatchQueue(label: "com.clashbar.mihomo-process.validation", qos: .userInitiated)
+            ?? DispatchQueue(label: "com.sbar.core-process.validation", qos: .userInitiated)
     }
 
     deinit {
@@ -494,7 +494,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
     {
         switch resolvedBinary.kind {
         case .mihomo:
-            // `-d` pins mihomo runtime home directory to ClashBar working root.
+            // `-d` pins mihomo runtime home directory to SBar working root.
             // This prevents fallback to ~/.config/mihomo for provider/cache updates.
             ["-d", workingDirectoryURL.path, "-f", configPath, "-ext-ctl", controller]
         case .singBox:
@@ -684,7 +684,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
             return managedPath
         } catch {
             throw NSError(
-                domain: "ClashBar.Core",
+                domain: "SBar.Core",
                 code: 500,
                 userInfo: [
                     NSLocalizedDescriptionKey:
@@ -727,7 +727,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
                     .trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown error"
                 try? self.fileManager.removeItem(atPath: temporaryPath)
                 throw NSError(
-                    domain: "ClashBar.Core",
+                    domain: "SBar.Core",
                     code: 500,
                     userInfo: [
                         NSLocalizedDescriptionKey:
@@ -742,11 +742,11 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
         } catch {
             try? outputHandle.close()
             try? self.fileManager.removeItem(atPath: temporaryPath)
-            if let error = error as NSError?, error.domain == "ClashBar.Core" {
+            if let error = error as NSError?, error.domain == "SBar.Core" {
                 throw error
             }
             throw NSError(
-                domain: "ClashBar.Core",
+                domain: "SBar.Core",
                 code: 500,
                 userInfo: [
                     NSLocalizedDescriptionKey:
@@ -758,7 +758,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
     private func ensureExecutableIfNeeded(at path: String) throws {
         guard self.fileManager.fileExists(atPath: path) else {
             throw NSError(
-                domain: "ClashBar.Core",
+                domain: "SBar.Core",
                 code: 404,
                 userInfo: [NSLocalizedDescriptionKey: "core binary not found at \(path)"])
         }
@@ -773,13 +773,13 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
 
         if values.isSymbolicLink == true {
             throw NSError(
-                domain: "ClashBar.Core",
+                domain: "SBar.Core",
                 code: 403,
                 userInfo: [NSLocalizedDescriptionKey: "core binary path must not be a symbolic link: \(path)"])
         }
         if values.isRegularFile != true {
             throw NSError(
-                domain: "ClashBar.Core",
+                domain: "SBar.Core",
                 code: 403,
                 userInfo: [NSLocalizedDescriptionKey: "core binary must be a regular file: \(path)"])
         }
@@ -790,7 +790,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
             let ownerID = owner.intValue
             if ownerID != 0, ownerID != uid {
                 throw NSError(
-                    domain: "ClashBar.Core",
+                    domain: "SBar.Core",
                     code: 403,
                     userInfo: [NSLocalizedDescriptionKey: "core binary owner must be current user or root: \(path)"])
             }
@@ -801,7 +801,7 @@ final class CoreProcessManager: CoreControlling, @unchecked Sendable {
             // Refuse group-writable or world-writable executables.
             if (mode & 0o022) != 0 {
                 throw NSError(
-                    domain: "ClashBar.Core",
+                    domain: "SBar.Core",
                     code: 403,
                     userInfo: [
                         NSLocalizedDescriptionKey:

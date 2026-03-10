@@ -189,6 +189,12 @@ extension AppState {
         guard self.coreSourcePreference == .appManaged else { return false }
         guard !self.isSystemSingBoxAvailable else { return false }
         guard self.shouldDeferAutoStartForMissingManagedCore() else { return false }
+        if defaults.bool(forKey: legacyInitialNoCoreSetupGuideShownKey),
+           !defaults.bool(forKey: initialNoCoreSetupGuideShownKey)
+        {
+            defaults.set(true, forKey: initialNoCoreSetupGuideShownKey)
+            defaults.removeObject(forKey: legacyInitialNoCoreSetupGuideShownKey)
+        }
         guard !defaults.bool(forKey: initialNoCoreSetupGuideShownKey) else { return false }
         return true
     }

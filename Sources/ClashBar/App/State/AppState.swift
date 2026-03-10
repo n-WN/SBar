@@ -356,19 +356,26 @@ final class AppState: ObservableObject {
     var isLatestAppReleaseCheckInFlight = false
 
     let defaults = UserDefaults.standard
-    @AppStorage("clashbar.auto.start.core") private var autoStartCore: Bool = false
-    @AppStorage("clashbar.auto.core.network.recovery") private var autoCoreControlOnNetworkChange: Bool = true
-    @AppStorage("clashbar.statusbar.display.mode") private var statusBarDisplayModeRaw: String = StatusBarDisplayMode
+    @AppStorage("sbar.auto.start.core") private var autoStartCore: Bool = false
+    @AppStorage("sbar.auto.core.network.recovery") private var autoCoreControlOnNetworkChange: Bool = true
+    @AppStorage("sbar.statusbar.display.mode") private var statusBarDisplayModeRaw: String = StatusBarDisplayMode
         .iconOnly.rawValue
-    @AppStorage("clashbar.proxy.node.hide_unavailable") var hideUnavailableProxyNodes: Bool = false
-    let selectedConfigKey = "clashbar.config.selected.filename"
+    @AppStorage("sbar.proxy.node.hide_unavailable") var hideUnavailableProxyNodes: Bool = false
+    let selectedConfigKey = "sbar.config.selected.filename"
+    let legacySelectedConfigFilenameKey = "clashbar.config.selected.filename"
     let legacySelectedConfigKey = "clashbar.config.selected"
-    let remoteConfigSourcesKey = "clashbar.config.remote.sources.v1"
-    let lastSuccessfulConfigPathKey = "clashbar.last.success.config.path"
-    let editableSettingsSnapshotKey = "clashbar.settings.editable.snapshot.v1"
-    let coreSourcePreferenceKey = "clashbar.core.source.preference.v1"
-    let uiLanguageKey = "clashbar.ui.language"
-    let appearanceModeKey = "clashbar.ui.appearance.mode"
+    let remoteConfigSourcesKey = "sbar.config.remote.sources.v1"
+    let legacyRemoteConfigSourcesKey = "clashbar.config.remote.sources.v1"
+    let lastSuccessfulConfigPathKey = "sbar.last.success.config.path"
+    let legacyLastSuccessfulConfigPathKey = "clashbar.last.success.config.path"
+    let editableSettingsSnapshotKey = "sbar.settings.editable.snapshot.v1"
+    let legacyEditableSettingsSnapshotKey = "clashbar.settings.editable.snapshot.v1"
+    let coreSourcePreferenceKey = "sbar.core.source.preference.v1"
+    let legacyCoreSourcePreferenceKey = "clashbar.core.source.preference.v1"
+    let uiLanguageKey = "sbar.ui.language"
+    let legacyUILanguageKey = "clashbar.ui.language"
+    let appearanceModeKey = "sbar.ui.appearance.mode"
+    let legacyAppearanceModeKey = "clashbar.ui.appearance.mode"
     let maxLogEntries = 200
     let hiddenPanelMaxInMemoryLogEntries = 20
     let maxBufferedMihomoLogEntries = 40
@@ -408,7 +415,8 @@ final class AppState: ObservableObject {
     var remoteConfigSources: [String: String] = [:]
     var externalControllerWarningKeys: Set<String> = []
     let streamJSONDecoder = JSONDecoder()
-    let initialNoCoreSetupGuideShownKey = "clashbar.core.install.guide.shown.v1"
+    let initialNoCoreSetupGuideShownKey = "sbar.core.install.guide.shown.v1"
+    let legacyInitialNoCoreSetupGuideShownKey = "clashbar.core.install.guide.shown.v1"
     let bundlesManagedCore: Bool
     var didPresentInitialNoCoreSetupGuide = false
 
@@ -471,7 +479,7 @@ final class AppState: ObservableObject {
         do {
             try self.workingDirectoryManager.bootstrapDirectories()
             clashbarLogFileURL = self.workingDirectoryManager.logsDirectoryURL.appendingPathComponent(
-                "clashbar.log",
+                "sbar.log",
                 isDirectory: false)
             mihomoLogFileURL = self.workingDirectoryManager.logsDirectoryURL.appendingPathComponent(
                 "mihomo.log",
@@ -543,7 +551,13 @@ final class AppState: ObservableObject {
     }
 
     private static func resolveBundledManagedCoreFlag() -> Bool {
-        guard let value = Bundle.main.object(forInfoDictionaryKey: "ClashBarBundlesMihomoCore") else {
+        let infoKeys = ["SBarBundlesManagedCore", "ClashBarBundlesMihomoCore"]
+        let value = infoKeys
+            .lazy
+            .compactMap { Bundle.main.object(forInfoDictionaryKey: $0) }
+            .first
+
+        guard let value else {
             return true
         }
 

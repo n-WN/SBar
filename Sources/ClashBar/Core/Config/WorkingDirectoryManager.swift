@@ -1,6 +1,9 @@
 import Foundation
 
 struct WorkingDirectoryManager {
+    static let currentRootDirectoryName = "sbar"
+    static let legacyRootDirectoryName = "clashbar"
+
     let homeDirectory: URL
 
     init(homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser) {
@@ -8,7 +11,27 @@ struct WorkingDirectoryManager {
     }
 
     var rootDirectoryURL: URL {
-        self.homeDirectory.appendingPathComponent("Library/Application Support/clashbar", isDirectory: true)
+        let fileManager = FileManager.default
+        let legacy = self.legacyRootDirectoryURL
+
+        // Prefer legacy path when it exists so upgrades keep existing configs/core installs.
+        if fileManager.fileExists(atPath: legacy.path) {
+            return legacy
+        }
+
+        return self.currentRootDirectoryURL
+    }
+
+    var currentRootDirectoryURL: URL {
+        self.homeDirectory.appendingPathComponent(
+            "Library/Application Support/\(Self.currentRootDirectoryName)",
+            isDirectory: true)
+    }
+
+    var legacyRootDirectoryURL: URL {
+        self.homeDirectory.appendingPathComponent(
+            "Library/Application Support/\(Self.legacyRootDirectoryName)",
+            isDirectory: true)
     }
 
     var configDirectoryURL: URL {
@@ -48,16 +71,16 @@ struct WorkingDirectoryManager {
         let root = self.rootDirectoryURL.standardizedFileURL.resolvingSymlinksInPath()
         guard self.isDescendantOrEqual(standardized, parent: root) else {
             throw NSError(
-                domain: "ClashBar.PathSecurity",
+                domain: "SBar.PathSecurity",
                 code: 403,
-                userInfo: [NSLocalizedDescriptionKey: "Path escapes ClashBar working directory: \(standardized.path)"])
+                userInfo: [NSLocalizedDescriptionKey: "Path escapes SBar working directory: \(standardized.path)"])
         }
 
         if let mustBeDirectory {
             let values = try standardized.resourceValues(forKeys: [.isDirectoryKey])
             if values.isDirectory != mustBeDirectory {
                 throw NSError(
-                    domain: "ClashBar.PathSecurity",
+                    domain: "SBar.PathSecurity",
                     code: 400,
                     userInfo: [NSLocalizedDescriptionKey: mustBeDirectory
                         ? "Expected directory path: \(standardized.path)"
@@ -73,7 +96,7 @@ struct WorkingDirectoryManager {
         if fileManager.fileExists(atPath: url.path, isDirectory: &isDir) {
             if !isDir.boolValue {
                 throw NSError(
-                    domain: "ClashBar.PathSecurity",
+                    domain: "SBar.PathSecurity",
                     code: 409,
                     userInfo: [NSLocalizedDescriptionKey: "Expected directory but found file: \(url.path)"])
             }
