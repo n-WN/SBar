@@ -9,7 +9,7 @@
 "ui.log_filter.warning" = "警告";
 "ui.log_filter.error" = "错误";
 "ui.log_source.all" = "全部来源";
-"ui.log_source.clashbar" = "ClashBar";
+"ui.log_source.clashbar" = "SBar";
 "ui.log_source.mihomo" = "Mihomo";
 
 "ui.header.status.running" = "运行中";
@@ -70,6 +70,7 @@
 "ui.section.proxy_providers" = "代理提供者";
 "ui.section.proxy_groups" = "代理组";
 "ui.section.basic_settings" = "基础设置";
+"ui.section.core_runtime" = "内核运行时";
 "ui.section.proxy_ports" = "代理端口";
 "ui.section.maintenance" = "系统维护";
 
@@ -106,6 +107,12 @@
 "ui.settings.auto_start_core" = "内核自启";
 "ui.settings.auto_core_network_recovery" = "断网停核";
 "ui.settings.launch_at_login" = "开机自启";
+"ui.settings.core_source" = "内核来源";
+"ui.settings.core_source.app_managed" = "应用托管";
+"ui.settings.core_source.system_sing_box" = "系统 sing-box";
+"ui.settings.core_binary" = "当前内核";
+"ui.settings.core_binary_path" = "内核路径";
+"ui.settings.core_capability_hint.sing_box" = "sing-box 模式保留控制器能力，但这里暂不支持运行时配置补丁和 TUN 切换。";
 "ui.settings.menu_bar_style" = "状态栏样式";
 "ui.settings.language" = "界面语言";
 "ui.settings.appearance" = "外观模式";
@@ -135,6 +142,7 @@
 "ui.language.en" = "English";
 
 "ui.footer.core_mihomo" = "MIHOMO %@";
+"ui.footer.core_sing_box" = "SING-BOX %@";
 "ui.footer.version" = "v%@";
 "ui.footer.version_update_help" = "查看 v%@ 版本说明";
 "ui.footer.version_update_accessibility" = "当前版本 v%@，可更新到 v%@。";
@@ -154,6 +162,7 @@
 "app.primary.start" = "启动内核";
 
 "app.settings.error.port_range" = "%@ 端口必须在 0~65535";
+"app.settings.error.unsupported_for_sing_box" = "当前 sing-box 运行时控制暂不支持这个设置。";
 "app.settings.saved.ports" = "代理端口已保存";
 "app.settings.saved.ports_auto" = "代理端口已自动保存";
 "app.settings.saved.single_key" = "%@ 已保存";
@@ -163,19 +172,20 @@
 "app.settings.error.save_failed" = "%@ 保存失败: %@";
 "app.settings.overlay_success" = "已保留设置并覆盖当前配置";
 "app.launch_at_login.error.unsupported_environment" = "仅可在 .app 包内启用开机自启，请运行打包后的应用";
-"app.launch_at_login.error.requires_approval" = "需要在系统设置 > 通用 > 登录项中允许 ClashBar";
+"app.launch_at_login.error.requires_approval" = "需要在系统设置 > 通用 > 登录项中允许 SBar";
 "app.launch_at_login.error.register_failed" = "开启开机自启失败: %@";
 "app.launch_at_login.error.unregister_failed" = "关闭开机自启失败: %@";
 "app.system_proxy.error.invalid_host" = "代理地址无效";
 "app.system_proxy.error.invalid_port" = "代理端口无效";
 "app.system_proxy.error.helper_not_bundled" = "未找到系统代理 helper。请使用打包后的应用（.app/.dmg）";
-"app.system_proxy.error.helper_install_location" = "请先将 ClashBar.app 拖到“应用程序”目录后重试";
-"app.system_proxy.error.helper_needs_approval" = "需要在系统设置 > 通用 > 登录项中允许 ClashBar 后台项目，然后重试";
+"app.system_proxy.error.helper_install_location" = "请先将 SBar.app 拖到“应用程序”目录后重试";
+"app.system_proxy.error.helper_needs_approval" = "需要在系统设置 > 通用 > 登录项中允许 SBar 后台项目，然后重试";
 "app.system_proxy.error.helper_registration_failed" = "注册系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_recovery_failed" = "恢复系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_connection_failed" = "连接系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_operation_failed" = "系统代理 helper 执行失败: %@";
 "app.tun.error.binary_not_found" = "未找到 mihomo 二进制。请先将名为“mihomo”的可执行文件复制到以下目录：\n%@";
+"app.tun.error.unsupported_for_sing_box" = "SBar 当前暂不支持 sing-box 的 TUN 运行时控制。";
 "app.tun.error.permission_missing" = "TUN 模式需要 mihomo 二进制具备 root + setuid 权限。";
 "app.tun.error.authorization_cancelled" = "管理员授权已取消。";
 "app.tun.error.authorization_failed" = "授予 TUN 权限失败: %@";
@@ -191,7 +201,7 @@
 "app.config.remote_import.alert.success.title" = "订阅导入成功";
 "app.config.remote_import.alert.failure.title" = "订阅导入失败";
 "app.config.validation_failed.title" = "配置校验失败";
-"app.config.validation_failed.message" = "选中的配置文件未通过 mihomo -t 校验，无法启动内核。\n\n文件：%@\n\n详情：\n%@";
+"app.config.validation_failed.message" = "选中的配置文件未通过内核校验，无法启动内核。\n\n文件：%@\n\n详情：\n%@";
 "app.config.validation_failed.startup" = "启动前配置校验失败：%@";
 
 "app.provider_refresh.cancelled_reason" = "Providers 更新已取消 (%@)";
@@ -213,11 +223,14 @@
 "app.core.alert.start_failed.title" = "启动内核失败";
 "app.core.alert.restart_failed.title" = "重启内核失败";
 "app.core.alert.process_terminated.title" = "内核异常退出";
-"app.core.error.binary_not_found" = "当前版本未内置 mihomo。请先将名为“mihomo”的可执行文件复制到以下目录，再重新启动 ClashBar Core：\n%@";
-"app.core.setup_required.title" = "安装 Mihomo 内核";
-"app.core.setup_required.message" = "当前版本不内置 mihomo。首次使用前，请将名为“mihomo”的可执行文件复制到以下目录：\n%@\n\nClashBar 之后会从该目录读取内核。";
+"app.core.error.binary_not_found" = "未找到应用托管内核。请先将名为“sing-box”或“mihomo”的可执行文件复制到以下目录，再重新启动 SBar Core：\n%@";
+"app.core.error.system_sing_box_not_found" = "未找到兼容的系统 sing-box。请安装 Homebrew 版本，或提供带 Clash API 支持的构建。";
+"app.core.error.system_sing_box_missing_clash_api" = "检测到的系统 sing-box 不包含 Clash API 支持：\n%@";
+"app.core.error.system_sing_box_requires_json" = "sing-box 需要 JSON 配置文件。\n\n当前文件：\n%@";
+"app.core.setup_required.title" = "安装内核";
+"app.core.setup_required.message" = "当前版本不内置托管内核。首次使用前，请将名为“sing-box”或“mihomo”的可执行文件复制到以下目录：\n%@\n\nSBar 之后会从该目录读取内核。";
 
-"log.process.terminated" = "mihomo 已退出，退出码 %d";
+"log.process.terminated" = "内核已退出，退出码 %d";
 "log.working_dir_init_failed" = "初始化工作目录失败: %@";
 "log.start.no_config" = "未选择配置文件";
 "log.start.failed" = "启动内核失败: %@";

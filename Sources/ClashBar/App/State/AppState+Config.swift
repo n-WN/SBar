@@ -5,33 +5,40 @@ import UniformTypeIdentifiers
 @MainActor
 extension AppState {
     func seedBundledConfigIfNeeded() {
+        let seeds = [
+            ("SBar.yaml", "ClashBar.yaml"),
+            ("SBar.json", "SBar.json"),
+        ]
         let fileManager = FileManager.default
-        let targetURL = workingDirectoryManager.configDirectoryURL
-            .appendingPathComponent("ClashBar.yaml", isDirectory: false)
 
-        if fileManager.fileExists(atPath: targetURL.path) {
-            return
-        }
+        for (targetName, bundledName) in seeds {
+            let targetURL = workingDirectoryManager.configDirectoryURL
+                .appendingPathComponent(targetName, isDirectory: false)
 
-        guard let bundledConfigURL = bundledDefaultConfigURL(fileManager: fileManager) else {
-            return
-        }
+            if fileManager.fileExists(atPath: targetURL.path) {
+                continue
+            }
 
-        do {
-            let data = try Data(contentsOf: bundledConfigURL)
-            try writeConfigData(data, to: targetURL)
-        } catch {
-            appendLog(
-                level: "error",
-                message: tr("log.config.import_local.failed", "ClashBar.yaml", error.localizedDescription))
+            guard let bundledConfigURL = bundledDefaultConfigURL(named: bundledName, fileManager: fileManager) else {
+                continue
+            }
+
+            do {
+                let data = try Data(contentsOf: bundledConfigURL)
+                try writeConfigData(data, to: targetURL)
+            } catch {
+                appendLog(
+                    level: "error",
+                    message: tr("log.config.import_local.failed", targetName, error.localizedDescription))
+            }
         }
     }
 
-    private func bundledDefaultConfigURL(fileManager: FileManager = .default) -> URL? {
+    private func bundledDefaultConfigURL(named fileName: String, fileManager: FileManager = .default) -> URL? {
         let candidateRelativePaths = [
-            "ConfigTemplates/ClashBar.yaml",
-            "Resources/ConfigTemplates/ClashBar.yaml",
-            "ClashBar.yaml",
+            "ConfigTemplates/\(fileName)",
+            "Resources/ConfigTemplates/\(fileName)",
+            fileName,
         ]
 
         for root in AppResourceBundleLocator.candidateResourceRoots() {
@@ -127,11 +134,11 @@ extension AppState {
         panel.title = tr("ui.quick.import_local_config")
         panel.directoryURL = configDirectory
         var allowedTypes: [UTType] = []
-        if let yamlType = UTType(filenameExtension: "yaml") {
-            allowedTypes.append(yamlType)
-        }
-        if let ymlType = UTType(filenameExtension: "yml"), !allowedTypes.contains(ymlType) {
-            allowedTypes.append(ymlType)
+        for fileExtension in ConfigDirectoryManager.supportedExtensions {
+            guard let type = UTType(filenameExtension: fileExtension), !allowedTypes.contains(type) else {
+                continue
+            }
+            allowedTypes.append(type)
         }
         if !allowedTypes.isEmpty {
             panel.allowedContentTypes = allowedTypes
@@ -334,6 +341,7 @@ extension AppState {
 
     private func refreshConfigStateAfterMutation() {
         _ = configManager.reloadConfigs()
+        self.alignSelectedConfigWithCurrentCoreIfNeeded()
         if self.syncSelectedConfigSelection(configManager.selectedConfig) == nil {
             selectedConfigName = "-"
             defaults.removeObject(forKey: selectedConfigKey)

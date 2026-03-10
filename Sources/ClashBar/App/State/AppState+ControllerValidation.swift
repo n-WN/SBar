@@ -90,6 +90,12 @@ extension AppState {
     }
 
     private func parseExternalController(fromConfigAt configPath: String) -> String? {
+        if self.isJSONConfigFile(configPath) {
+            return self.parseJSONConfigString(
+                at: configPath,
+                path: ["experimental", "clash_api", "external_controller"])
+        }
+
         guard let raw = try? String(contentsOfFile: configPath, encoding: .utf8) else {
             return nil
         }
@@ -106,6 +112,14 @@ extension AppState {
     }
 
     private func syncControllerSecretFromConfigFileIfReadable(configPath: String) {
+        if self.isJSONConfigFile(configPath) {
+            let parsedSecret = self.parseJSONConfigString(
+                at: configPath,
+                path: ["experimental", "clash_api", "secret"])
+            self.applyControllerSecretFromConfig(parsedSecret)
+            return
+        }
+
         guard let raw = try? String(contentsOfFile: configPath, encoding: .utf8) else {
             return
         }
@@ -277,5 +291,29 @@ extension AppState {
             return "\(hostSegment):\(port)"
         }
         return hostSegment
+    }
+
+    private func isJSONConfigFile(_ configPath: String) -> Bool {
+        URL(fileURLWithPath: configPath).pathExtension.lowercased() == "json"
+    }
+
+    private func parseJSONConfigString(at configPath: String, path: [String]) -> String? {
+        guard
+            let data = try? Data(contentsOf: URL(fileURLWithPath: configPath)),
+            let object = try? JSONSerialization.jsonObject(with: data),
+            let root = object as? [String: Any]
+        else {
+            return nil
+        }
+
+        var current: Any = root
+        for component in path {
+            guard let dictionary = current as? [String: Any], let next = dictionary[component] else {
+                return nil
+            }
+            current = next
+        }
+
+        return current as? String
     }
 }

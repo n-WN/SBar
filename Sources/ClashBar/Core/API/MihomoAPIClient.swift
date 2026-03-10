@@ -1,6 +1,6 @@
 import Foundation
 
-protocol MihomoAPITransporting: Sendable {
+protocol CoreAPITransporting: Sendable {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
     func requestNoResponse(_ endpoint: Endpoint) async throws
 }
@@ -13,7 +13,7 @@ enum HTTPMethod: String {
     case delete = "DELETE"
 }
 
-enum JSONValue: Sendable {
+enum JSONValue {
     case string(String)
     case int(Int)
     case bool(Bool)
@@ -42,7 +42,7 @@ enum JSONValue: Sendable {
     }
 }
 
-enum Endpoint: Sendable {
+enum Endpoint {
     private static let proxyProvidersPath = "/providers/proxies"
     private static let ruleProvidersPath = "/providers/rules"
 
@@ -198,7 +198,7 @@ enum APIError: Error, LocalizedError {
     }
 }
 
-final class MihomoAPIClient: MihomoAPITransporting, @unchecked Sendable {
+final class CoreAPIClient: CoreAPITransporting, @unchecked Sendable {
     // Request building reads mutable credentials; guard with lock for thread safety.
     private let lock = NSLock()
     private let session: URLSession
@@ -353,6 +353,9 @@ final class MihomoAPIClient: MihomoAPITransporting, @unchecked Sendable {
         return "http://\(controller)"
     }
 }
+
+typealias MihomoAPITransporting = CoreAPITransporting
+typealias MihomoAPIClient = CoreAPIClient
 
 extension String {
     fileprivate var urlPathSegmentEscaped: String {

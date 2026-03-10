@@ -20,6 +20,8 @@ extension MenuBarRoot {
                             .padding(.vertical, T.space4)
                     }
                 }
+                .padding(T.denseSectionInset)
+                .background(self.sectionCardBackground())
             }
         }
     }
@@ -39,7 +41,8 @@ extension MenuBarRoot {
                 .font(.app(size: T.FontSize.body, weight: .regular))
                 .foregroundStyle(nativePrimaryLabel)
         }
-        .menuRowPadding(vertical: T.space4)
+        .padding(T.sectionInset)
+        .background(self.sectionCardBackground())
     }
 
     var logsSecondaryControlRow: some View {
@@ -133,26 +136,33 @@ extension MenuBarRoot {
         }
     }
 
-    @ViewBuilder
     func logFilterToggleButton(
         title: String,
         selected: Bool,
         action: @escaping () -> Void) -> some View
     {
-        if selected {
-            self.logFilterButtonLabel(title, action: action).buttonStyle(.borderedProminent)
-        } else {
-            self.logFilterButtonLabel(title, action: action).buttonStyle(.bordered)
-        }
+        self.logFilterButtonLabel(title, selected: selected, action: action)
     }
 
-    private func logFilterButtonLabel(_ title: String, action: @escaping () -> Void) -> some View {
+    private func logFilterButtonLabel(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.app(size: T.FontSize.caption, weight: .medium))
                 .lineLimit(1)
+                .foregroundStyle(selected ? self.nativePrimaryLabel : self.nativeSecondaryLabel)
+                .padding(.horizontal, T.space6)
+                .padding(.vertical, T.space4)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(selected ? self.nativeAccent.opacity(T.Opacity.tint) : self.cardFillColor.opacity(0.82))
+                        .overlay {
+                            Capsule(style: .continuous)
+                                .stroke(
+                                    selected ? self.nativeAccent.opacity(0.22) : self.cardBorderColor.opacity(0.6),
+                                    lineWidth: T.stroke)
+                        })
         }
-        .controlSize(.small)
+        .buttonStyle(.plain)
     }
 
     private static let fullLogSourceSelection = Set(AppLogSource.allCases)

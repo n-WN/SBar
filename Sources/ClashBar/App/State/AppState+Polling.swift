@@ -2,6 +2,28 @@ import Foundation
 
 @MainActor
 extension AppState {
+    @discardableResult
+    func assignIfChanged<Value: Equatable>(
+        _ keyPath: ReferenceWritableKeyPath<AppState, Value>,
+        to newValue: Value) -> Bool
+    {
+        guard self[keyPath: keyPath] != newValue else { return false }
+        self[keyPath: keyPath] = newValue
+        return true
+    }
+
+    func bumpConnectionsRevision() {
+        self.connectionsRevision = self.connectionsRevision &+ 1
+    }
+
+    func bumpRulesRevision() {
+        self.rulesRevision = self.rulesRevision &+ 1
+    }
+
+    func bumpLogsRevision() {
+        self.logsRevision = self.logsRevision &+ 1
+    }
+
     func startPolling() {
         self.teardownStreams()
         self.ensurePeriodicTasksForCurrentVisibility()
@@ -117,7 +139,7 @@ extension AppState {
         panelPresented: Bool,
         activeTab: RootTab) -> DataAcquisitionPolicy
     {
-        let trafficEnabled = panelPresented || self.statusBarDisplayMode != .iconOnly
+        let trafficEnabled = self.statusBarDisplayMode != .iconOnly || (panelPresented && activeTab == .proxy)
 
         if !panelPresented {
             return DataAcquisitionPolicy(
@@ -137,13 +159,12 @@ extension AppState {
             foregroundLowFrequencyOtherTabsIntervalNanoseconds
         }
 
-        let memoryEnabled = activeTab == .proxy
         let connectionsEnabled = (activeTab == .proxy || activeTab == .activity)
         let logsEnabled = activeTab == .logs
 
         return DataAcquisitionPolicy(
             enableTrafficStream: trafficEnabled,
-            enableMemoryStream: memoryEnabled,
+            enableMemoryStream: false,
             enableConnectionsStream: connectionsEnabled,
             connectionsIntervalMilliseconds: connectionsEnabled ? 1000 : nil,
             enableLogsStream: logsEnabled,
@@ -193,6 +214,7 @@ extension AppState {
         case .logs:
             break
         case .system:
+            self.refreshCoreBinaryState()
             await self.refreshMediumFrequency()
             guard shouldContinueRefresh() else { return }
             await self.refreshSystemProxyStatus()
@@ -206,14 +228,19 @@ extension AppState {
             if self.activeMenuTab == .proxy {
                 async let versionTask: VersionInfo = client.request(.version)
                 async let configTask: ConfigSnapshot = client.request(.getConfigs)
+                // Memory usage is only displayed in the proxy dashboard. Polling it alongside
+                // other medium-frequency data avoids keeping an extra websocket alive.
+                async let memoryTask: MemorySnapshot = client.request(.memory)
                 async let proxyGroupsTask = self.fetchProxyGroupsAndProviders(using: client)
 
-                let (version, config, proxyGroupsPayload) = try await (
+                let (version, config, memory, proxyGroupsPayload) = try await (
                     versionTask,
                     configTask,
+                    memoryTask,
                     proxyGroupsTask)
-                self.version = version.version
+                self.assignIfChanged(\.version, to: version.version)
                 self.applyRuntimeConfigSnapshot(config)
+                self.assignIfChanged(\.memory, to: memory)
                 self.applyProxyGroupsResponse(
                     proxyGroupsPayload.groups,
                     proxyProviders: proxyGroupsPayload.providers)
@@ -222,7 +249,7 @@ extension AppState {
                 async let configTask: ConfigSnapshot = client.request(.getConfigs)
 
                 let (version, config) = try await (versionTask, configTask)
-                self.version = version.version
+                self.assignIfChanged(\.version, to: version.version)
                 self.applyRuntimeConfigSnapshot(config)
             }
         }
@@ -238,15 +265,15 @@ extension AppState {
     private func applyRuntimeConfigSnapshot(_ config: ConfigSnapshot) {
         let remoteMode = normalizeMode(config.mode)
         if let remoteMode {
-            currentMode = remoteMode
+            self.assignIfChanged(\.currentMode, to: remoteMode)
         }
-        logLevel = config.logLevel ?? logLevel
+        self.assignIfChanged(\.logLevel, to: config.logLevel ?? self.logLevel)
 
-        port = config.port
-        socksPort = config.socksPort
-        redirPort = config.redirPort
-        tproxyPort = config.tproxyPort
-        mixedPort = config.mixedPort ?? 0
+        self.assignIfChanged(\.port, to: config.port)
+        self.assignIfChanged(\.socksPort, to: config.socksPort)
+        self.assignIfChanged(\.redirPort, to: config.redirPort)
+        self.assignIfChanged(\.tproxyPort, to: config.tproxyPort)
+        self.assignIfChanged(\.mixedPort, to: config.mixedPort ?? 0)
 
         if let externalController = config.externalController {
             applyExternalControllerFromConfig(externalController)
@@ -260,35 +287,49 @@ extension AppState {
     }
 
     func clearTrafficPresentationHistory() {
-        displayUpTotal = 0
-        displayDownTotal = 0
-        trafficHistoryUp = []
-        trafficHistoryDown = []
+        self.assignIfChanged(\.displayUpTotal, to: 0)
+        self.assignIfChanged(\.displayDownTotal, to: 0)
+        self.assignIfChanged(\.trafficHistoryUp, to: [])
+        self.assignIfChanged(\.trafficHistoryDown, to: [])
         lastTrafficSampleAt = nil
     }
 
     private func releasePanelCachedData() {
-        connectionsCount = 0
-        connections.removeAll(keepingCapacity: false)
+        self.assignIfChanged(\.connectionsCount, to: 0)
+        if !connections.isEmpty {
+            connections.removeAll(keepingCapacity: false)
+            self.bumpConnectionsRevision()
+        }
 
-        memory = MemorySnapshot(inuse: 0)
+        self.assignIfChanged(\.memory, to: MemorySnapshot(inuse: 0))
 
-        proxyGroups.removeAll(keepingCapacity: false)
-        groupLatencyLoading.removeAll(keepingCapacity: false)
-        groupLatencies.removeAll(keepingCapacity: false)
-        proxyHistoryLatestDelay.removeAll(keepingCapacity: false)
+        if !proxyGroups.isEmpty { proxyGroups.removeAll(keepingCapacity: false) }
+        if !groupLatencyLoading.isEmpty { groupLatencyLoading.removeAll(keepingCapacity: false) }
+        if !groupLatencies.isEmpty { groupLatencies.removeAll(keepingCapacity: false) }
+        if !proxyHistoryLatestDelay.isEmpty { proxyHistoryLatestDelay.removeAll(keepingCapacity: false) }
 
-        providerProxyCount = 0
-        providerRuleCount = 0
-        rulesCount = 0
-        proxyProvidersDetail.removeAll(keepingCapacity: false)
-        expandedProxyProviders.removeAll(keepingCapacity: false)
-        providerNodeLatencies.removeAll(keepingCapacity: false)
-        providerNodeTesting.removeAll(keepingCapacity: false)
-        providerBatchTesting.removeAll(keepingCapacity: false)
-        providerUpdating.removeAll(keepingCapacity: false)
-        ruleProviders.removeAll(keepingCapacity: false)
-        ruleItems.removeAll(keepingCapacity: false)
+        self.assignIfChanged(\.providerProxyCount, to: 0)
+        self.assignIfChanged(\.providerRuleCount, to: 0)
+        self.assignIfChanged(\.rulesCount, to: 0)
+        if !proxyProvidersDetail.isEmpty { proxyProvidersDetail.removeAll(keepingCapacity: false) }
+        if !expandedProxyProviders.isEmpty { expandedProxyProviders.removeAll(keepingCapacity: false) }
+        if !providerNodeLatencies.isEmpty { providerNodeLatencies.removeAll(keepingCapacity: false) }
+        if !providerNodeTesting.isEmpty { providerNodeTesting.removeAll(keepingCapacity: false) }
+        if !providerBatchTesting.isEmpty { providerBatchTesting.removeAll(keepingCapacity: false) }
+        if !providerUpdating.isEmpty { providerUpdating.removeAll(keepingCapacity: false) }
+
+        var didResetRules = false
+        if !ruleProviders.isEmpty {
+            ruleProviders.removeAll(keepingCapacity: false)
+            didResetRules = true
+        }
+        if !ruleItems.isEmpty {
+            ruleItems.removeAll(keepingCapacity: false)
+            didResetRules = true
+        }
+        if didResetRules {
+            self.bumpRulesRevision()
+        }
     }
 
     func appendTrafficHistory(up: Int64, down: Int64) {
@@ -343,13 +384,16 @@ extension AppState {
         }
     }
 
-    private func fetchProxyGroupsAndProviders(using client: MihomoAPIClient) async throws -> (
+    private func fetchProxyGroupsAndProviders(using client: CoreAPIClient) async throws -> (
         groups: ProxyGroupsResponse,
         providers: [String: ProviderDetail])
     {
-        async let groupsTask: ProxyGroupsResponse = client.request(.proxies)
-        async let proxyProvidersTask: ProviderSummary? = try? await client.request(.proxyProviders)
-        let (groupsResponse, proxyProviders) = try await (groupsTask, proxyProvidersTask)
+        let groupsResponse: ProxyGroupsResponse = try await client.request(.proxies)
+        guard self.supportsProviderFeatures else {
+            return (groupsResponse, [:])
+        }
+
+        let proxyProviders: ProviderSummary? = try? await client.request(.proxyProviders)
         return (groupsResponse, proxyProviders?.providers ?? [:])
     }
 
@@ -383,7 +427,7 @@ extension AppState {
             sortIndexMap[name] = index
         }
 
-        proxyGroups = proxiesWithHealthcheckConfig
+        let nextProxyGroups = proxiesWithHealthcheckConfig
             .enumerated()
             .filter {
                 !$0.element.all.isEmpty
@@ -398,6 +442,7 @@ extension AppState {
                 return lhs.offset < rhs.offset
             }
             .map(\.element)
+        self.assignIfChanged(\.proxyGroups, to: nextProxyGroups)
 
         var historyMap: [String: Int] = [:]
         for proxy in response.proxies.values {
@@ -405,7 +450,7 @@ extension AppState {
                 historyMap[proxy.name] = latest
             }
         }
-        proxyHistoryLatestDelay = historyMap
+        self.assignIfChanged(\.proxyHistoryLatestDelay, to: historyMap)
     }
 
     func normalizedHealthcheckURL(_ value: String?) -> String? {
@@ -431,7 +476,7 @@ extension AppState {
 
     func refreshSystemProxyStatus() async {
         do {
-            isSystemProxyEnabled = try await readSystemProxyEnabledState()
+            try await self.assignIfChanged(\.isSystemProxyEnabled, to: readSystemProxyEnabledState())
         } catch {
             appendLog(level: "error", message: tr("log.system_proxy.read_failed", systemProxyErrorMessage(error)))
         }

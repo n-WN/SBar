@@ -2,11 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="${APP_NAME:-ClashBar}"
+APP_NAME="${APP_NAME:-SBar}"
 BUNDLE_ID="${BUNDLE_ID:-com.clashbar}"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 TARGET_ARCH="${TARGET_ARCH:-}"
+EXECUTABLE_NAME="${EXECUTABLE_NAME:-$APP_NAME}"
 PREPROCESS_DIR="${PREPROCESS_DIR:-$ROOT/dist/preprocess}"
 PREPROCESSED_ICON_PATH="${PREPROCESSED_ICON_PATH:-$PREPROCESS_DIR/${APP_NAME}.icns}"
 PREPROCESSED_MIHOMO_PATH="${PREPROCESSED_MIHOMO_PATH:-$PREPROCESS_DIR/mihomo}"
@@ -139,8 +140,8 @@ mkdir -p \
   "$APP/Contents/Library/HelperTools" \
   "$APP/Contents/Library/LaunchDaemons"
 
-cp "$BIN" "$APP/Contents/MacOS/ClashBar"
-chmod +x "$APP/Contents/MacOS/ClashBar"
+cp "$BIN" "$APP/Contents/MacOS/$EXECUTABLE_NAME"
+chmod +x "$APP/Contents/MacOS/$EXECUTABLE_NAME"
 
 rm -rf "$APP/Contents/Resources/ClashBar_ClashBar.bundle"
 cp -R "$RESOURCE_BUNDLE" "$APP/Contents/Resources/ClashBar_ClashBar.bundle"
@@ -199,7 +200,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <plist version="1.0"><dict>
 <key>CFBundleName</key><string>${APP_NAME}</string>
 <key>CFBundleDisplayName</key><string>${APP_NAME}</string>
-<key>CFBundleExecutable</key><string>ClashBar</string>
+<key>CFBundleExecutable</key><string>${EXECUTABLE_NAME}</string>
 <key>CFBundleIdentifier</key><string>${BUNDLE_ID}</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>${APP_VERSION}</string>

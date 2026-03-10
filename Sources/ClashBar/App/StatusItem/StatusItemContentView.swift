@@ -8,9 +8,9 @@ final class StatusItemContentView: NSView {
 
     // Keep a 1pt optical inset to stabilize status-item width across icon/text mode switches.
     private let statusItemHorizontalPadding: CGFloat = MenuBarLayoutTokens.space1
-    private let iconSize: CGFloat = 24
-    private let brandIconRenderSize: CGFloat = 24
-    private let symbolPointSize: CGFloat = 20
+    private let iconSize: CGFloat = 18
+    private let brandIconRenderSize: CGFloat = 18
+    private let symbolPointSize: CGFloat = 16
     private let iconTextSpacing: CGFloat = 1
     private let textContainerWidth: CGFloat = 42
     private let textLineHeight: CGFloat = 11
@@ -111,7 +111,7 @@ final class StatusItemContentView: NSView {
                 previousSymbolName != symbolName ||
                 self.currentDisplay?.mode != previousMode
             {
-                let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "ClashBar")
+                let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "SBar")
                 let config = NSImage.SymbolConfiguration(pointSize: self.symbolPointSize, weight: .semibold)
                 self.iconView.image = image?.withSymbolConfiguration(config)
             }

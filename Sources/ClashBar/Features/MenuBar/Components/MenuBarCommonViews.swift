@@ -68,7 +68,7 @@ extension MenuBarRoot {
         }
         .foregroundStyle(self.nativeSecondaryLabel)
         .padding(.horizontal, MenuBarLayoutTokens.space6)
-        .padding(.vertical, MenuBarLayoutTokens.space2)
+        .padding(.vertical, MenuBarLayoutTokens.space4)
         .background(self.nativeBadgeCapsule())
     }
 
@@ -97,9 +97,17 @@ extension MenuBarRoot {
             Label(optionTitle(selection), systemImage: symbol)
                 .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
                 .lineLimit(1)
+                .padding(.horizontal, T.space6)
+                .padding(.vertical, T.space4)
+                .background(
+                    RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                        .fill(self.cardFillColor.opacity(0.92))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                                .stroke(self.cardBorderColor.opacity(0.72), lineWidth: T.stroke)
+                        })
         }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
+        .buttonStyle(.plain)
         .help(helpText)
     }
 
@@ -107,79 +115,136 @@ extension MenuBarRoot {
         self.colorScheme == .dark
     }
 
+    var panelCanvasFill: Color {
+        if self.isDarkAppearance {
+            return Color(red: 0.10, green: 0.105, blue: 0.125)
+        }
+        return Color(red: 0.972, green: 0.973, blue: 0.982)
+    }
+
+    var panelShellFill: Color {
+        if self.isDarkAppearance {
+            return Color(red: 0.135, green: 0.14, blue: 0.165)
+        }
+        return Color(red: 0.952, green: 0.954, blue: 0.966)
+    }
+
+    var panelShellBorder: Color {
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.08)
+        }
+        return Color.black.opacity(0.07)
+    }
+
+    var cardFillColor: Color {
+        if self.isDarkAppearance {
+            return Color(red: 0.165, green: 0.17, blue: 0.20)
+        }
+        return Color.white.opacity(0.74)
+    }
+
+    var cardProminentFillColor: Color {
+        if self.isDarkAppearance {
+            return Color(red: 0.185, green: 0.19, blue: 0.225)
+        }
+        return Color.white.opacity(0.88)
+    }
+
+    var cardBorderColor: Color {
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.08)
+        }
+        return Color.black.opacity(0.065)
+    }
+
+    var elevatedCardBorderColor: Color {
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.12)
+        }
+        return Color.black.opacity(0.085)
+    }
+
     var nativeAccent: Color {
-        Color(nsColor: .controlAccentColor)
+        Color(red: 0.47, green: 0.60, blue: 0.94)
     }
 
     var nativeInfo: Color {
-        Color(nsColor: .systemBlue)
+        Color(red: 0.38, green: 0.64, blue: 0.95)
     }
 
     var nativePositive: Color {
-        Color(nsColor: .systemGreen)
+        Color(red: 0.25, green: 0.78, blue: 0.48)
     }
 
     var nativeWarning: Color {
-        Color(nsColor: .systemOrange)
+        Color(red: 0.96, green: 0.65, blue: 0.28)
     }
 
     var nativeCritical: Color {
-        Color(nsColor: .systemRed)
+        Color(red: 0.94, green: 0.44, blue: 0.46)
     }
 
     var nativeTeal: Color {
-        Color(nsColor: .systemTeal)
+        Color(red: 0.29, green: 0.74, blue: 0.79)
     }
 
     var nativeIndigo: Color {
-        Color(nsColor: .systemIndigo)
+        Color(red: 0.53, green: 0.53, blue: 0.93)
     }
 
     var nativePurple: Color {
-        Color(nsColor: .systemPurple)
+        Color(red: 0.74, green: 0.54, blue: 0.94)
     }
 
     var nativePrimaryLabel: Color {
-        Color(nsColor: .labelColor)
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.94)
+        }
+        return Color.black.opacity(0.82)
     }
 
     var nativeSecondaryLabel: Color {
-        Color(nsColor: .labelColor)
+        self.nativePrimaryLabel
             .opacity(self.isDarkAppearance ? T.Theme.Dark.labelSecondary : T.Theme.Light.labelSecondary)
     }
 
     var nativeTertiaryLabel: Color {
-        Color(nsColor: .labelColor)
+        self.nativePrimaryLabel
             .opacity(self.isDarkAppearance ? T.Theme.Dark.labelTertiary : T.Theme.Light.labelTertiary)
     }
 
     var nativeSeparator: Color {
-        Color(nsColor: .separatorColor)
+        self.cardBorderColor
             .opacity(self.isDarkAppearance ? T.Theme.Dark.separator : T.Theme.Light.separator)
     }
 
     var nativeControlFill: Color {
-        Color(nsColor: self.isDarkAppearance ? .controlBackgroundColor : .windowBackgroundColor)
+        self.cardFillColor
             .opacity(self.isDarkAppearance ? T.Theme.Dark.controlFill : T.Theme.Light.controlFill)
     }
 
     var nativeControlBorder: Color {
-        Color(nsColor: .separatorColor)
+        self.cardBorderColor
             .opacity(self.isDarkAppearance ? T.Theme.Dark.controlBorder : T.Theme.Light.controlBorder)
     }
 
     var nativeHoverFill: Color {
-        Color(nsColor: .selectedContentBackgroundColor)
-            .opacity(self.isDarkAppearance ? T.Theme.Dark.hoverFill : T.Theme.Light.hoverFill)
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.08)
+        }
+        return Color.black.opacity(0.045)
     }
 
     var nativeBadgeFill: Color {
-        Color(nsColor: .quaternaryLabelColor).opacity(MenuBarLayoutTokens.Opacity.tint)
+        if self.isDarkAppearance {
+            return Color.white.opacity(0.09)
+        }
+        return Color.black.opacity(0.045)
     }
 
     func nativeHoverRowBackground(
         _ hovered: Bool,
-        cornerRadius: CGFloat = MenuBarLayoutTokens.cornerRadius) -> some View
+        cornerRadius: CGFloat = MenuBarLayoutTokens.rowRadius) -> some View
     {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(hovered ? self.nativeHoverFill : .clear)
@@ -188,6 +253,66 @@ extension MenuBarRoot {
     func nativeBadgeCapsule() -> some View {
         Capsule(style: .continuous)
             .fill(self.nativeBadgeFill)
+            .overlay {
+                Capsule(style: .continuous)
+                    .stroke(self.cardBorderColor.opacity(0.55), lineWidth: T.stroke)
+            }
+    }
+
+    func softTintBackground(_ tint: Color, intensity: CGFloat = 1) -> some View {
+        RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+            .fill(tint.opacity(0.08 * intensity))
+            .overlay {
+                RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                    .stroke(tint.opacity(0.16 * intensity), lineWidth: T.stroke)
+            }
+    }
+
+    func sectionCardBackground(prominent: Bool = false) -> some View {
+        RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+            .fill(prominent ? self.cardProminentFillColor : self.nativeControlFill)
+            .overlay {
+                RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                    .stroke(
+                        (prominent ? self.elevatedCardBorderColor : self.nativeControlBorder)
+                            .opacity(prominent ? 0.95 : 0.82),
+                        lineWidth: T.stroke)
+            }
+            .shadow(
+                color: Color.black.opacity(prominent ? T.Shadow.card.opacity : 0.04),
+                radius: prominent ? T.Shadow.card.radius : 6,
+                x: 0,
+                y: prominent ? T.Shadow.card.y : 2)
+    }
+
+    func sectionInnerSurfaceBackground(prominent: Bool = false) -> some View {
+        RoundedRectangle(cornerRadius: T.innerCardRadius, style: .continuous)
+            .fill(prominent ? self.cardProminentFillColor.opacity(0.86) : self.cardFillColor.opacity(0.9))
+            .overlay {
+                RoundedRectangle(cornerRadius: T.innerCardRadius, style: .continuous)
+                    .stroke(self.cardBorderColor.opacity(prominent ? 0.78 : 0.66), lineWidth: T.stroke)
+            }
+    }
+
+    func sectionInnerListSurface(
+        spacing: CGFloat = 0,
+        @ViewBuilder content: () -> some View) -> some View
+    {
+        VStack(spacing: spacing) {
+            content()
+        }
+        .padding(T.space2)
+        .background(self.sectionInnerSurfaceBackground())
+    }
+
+    func sectionInnerEmptyState(_ text: String) -> some View {
+        Text(text)
+            .font(.app(size: MenuBarLayoutTokens.FontSize.body, weight: .regular))
+            .foregroundStyle(self.nativeSecondaryLabel)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, T.space6)
+            .padding(.vertical, T.space6)
+            .background(self.sectionInnerSurfaceBackground())
     }
 
     func emptyCard(_ text: String) -> some View {
@@ -196,18 +321,31 @@ extension MenuBarRoot {
             .foregroundStyle(self.nativeSecondaryLabel)
             .frame(maxWidth: .infinity, alignment: .leading)
             .menuRowPadding()
+            .background(self.sectionCardBackground())
     }
 
     var footerBar: some View {
-        let mihomoRepositoryURL = URL(string: "https://github.com/MetaCubeX/mihomo")
-        let mihomoSymbol = "antenna.radiowaves.left.and.right"
+        let repositoryURL: URL?
+        let iconSystemName: String
+        let coreText: String
+
+        switch appState.coreBinaryKind {
+        case .mihomo:
+            repositoryURL = URL(string: "https://github.com/MetaCubeX/mihomo")
+            iconSystemName = "antenna.radiowaves.left.and.right"
+            coreText = tr("ui.footer.core_mihomo", appState.version)
+        case .singBox:
+            repositoryURL = URL(string: "https://github.com/SagerNet/sing-box")
+            iconSystemName = "point.3.connected.trianglepath.dotted"
+            coreText = tr("ui.footer.core_sing_box", appState.version)
+        }
 
         return VStack(spacing: 0) {
             HStack(spacing: MenuBarLayoutTokens.space6) {
                 self.footerInfo(
-                    tr("ui.footer.core_mihomo", appState.version),
-                    url: mihomoRepositoryURL,
-                    iconSystemName: mihomoSymbol)
+                    coreText,
+                    url: repositoryURL,
+                    iconSystemName: iconSystemName)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .layoutPriority(1)
 
@@ -224,18 +362,18 @@ extension MenuBarRoot {
 
     var footerSurfaceBackground: some View {
         RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-            .fill(self.nativeControlFill.opacity(0.86))
+            .fill(self.nativeControlFill)
             .overlay {
                 RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
                     .stroke(
-                        self.nativeControlBorder.opacity(MenuBarLayoutTokens.Opacity.solid),
+                        self.nativeControlBorder.opacity(0.82),
                         lineWidth: MenuBarLayoutTokens.stroke)
             }
             .shadow(
-                color: Color(nsColor: .shadowColor).opacity(MenuBarLayoutTokens.Shadow.standard.opacity),
-                radius: MenuBarLayoutTokens.Shadow.standard.radius,
-                x: MenuBarLayoutTokens.Shadow.standard.x,
-                y: MenuBarLayoutTokens.Shadow.standard.y)
+                color: Color.black.opacity(T.Shadow.card.opacity),
+                radius: T.Shadow.card.radius,
+                x: T.Shadow.card.x,
+                y: T.Shadow.card.y)
     }
 
     @ViewBuilder
@@ -465,10 +603,25 @@ private struct CompactAsyncIconButton: View {
                     .opacity(self.isLoading ? 1 : 0)
             }
             .frame(width: self.size, height: self.size)
+            .background(
+                RoundedRectangle(
+                    cornerRadius: min(self.size * 0.42, MenuBarLayoutTokens.cardRadius),
+                    style: .continuous)
+                    .fill(self.hovered ? self.tint.opacity(0.14) : self.baseTint.opacity(0.06)))
+            .overlay {
+                RoundedRectangle(
+                    cornerRadius: min(self.size * 0.42, MenuBarLayoutTokens.cardRadius),
+                    style: .continuous)
+                    .stroke(self.hovered ? self.tint.opacity(0.26) : self.baseTint.opacity(0.08), lineWidth: 0.8)
+            }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .disabled(self.isLoading)
-        .onHover { self.hovered = $0 }
+        .onHover { isHovering in
+            withAnimation(.easeInOut(duration: 0.14)) {
+                self.hovered = isHovering
+            }
+        }
     }
 }

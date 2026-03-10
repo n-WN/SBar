@@ -3,6 +3,8 @@ import Foundation
 @MainActor
 extension AppState {
     func resolveSelectedConfigPath() async -> String? {
+        self.autoSelectAvailableCoreSourceIfNeeded()
+
         if let selected = configManager.selectedConfig {
             let selectedPath = self.syncSelectedConfigSelection(selected)
             self.syncConfigDisplayState()
@@ -70,13 +72,14 @@ extension AppState {
             selectedConfigName = first
         }
         self.pruneRemoteConfigSourcesIfNeeded()
+        self.refreshCoreBinaryState()
     }
 
     func ensureAPIClient() {
         if let apiClient {
             apiClient.updateCredentials(controller: controller, secret: controllerSecret)
         } else {
-            apiClient = MihomoAPIClient(controller: controller, secret: controllerSecret)
+            apiClient = CoreAPIClient(controller: controller, secret: controllerSecret)
         }
     }
 
@@ -110,6 +113,17 @@ extension AppState {
         }
         defaults.set(AppAppearanceMode.system.rawValue, forKey: appearanceModeKey)
         return .system
+    }
+
+    func loadPersistedCoreSourcePreference() -> CoreSourcePreference {
+        if let raw = defaults.string(forKey: coreSourcePreferenceKey),
+           let preference = CoreSourcePreference(rawValue: raw)
+        {
+            return preference
+        }
+
+        defaults.set(CoreSourcePreference.appManaged.rawValue, forKey: coreSourcePreferenceKey)
+        return .appManaged
     }
 
     func loadPersistedRemoteConfigSources() -> [String: String] {

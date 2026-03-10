@@ -323,13 +323,19 @@ extension AppState {
         startPolling()
         await refreshFromAPI(includeSlowCalls: true)
 
-        await self.syncEditableSettingsOverlayForCoreBootstrap(
-            settingsOverlay,
-            syncingKey: options.overlaySyncingKey)
-        await validateTunPermissionsOnStartup()
-        await ensureTunMixedStackOnStartupIfNeeded()
-        await self.verifyTunAfterOverlayIfNeeded(overlay: settingsOverlay)
-        enqueueProviderRefresh(trigger: options.providerTrigger)
+        if self.supportsEditableRuntimeSettings {
+            await self.syncEditableSettingsOverlayForCoreBootstrap(
+                settingsOverlay,
+                syncingKey: options.overlaySyncingKey)
+        }
+        if self.supportsTunRuntimeManagement {
+            await validateTunPermissionsOnStartup()
+            await ensureTunMixedStackOnStartupIfNeeded()
+            await self.verifyTunAfterOverlayIfNeeded(overlay: settingsOverlay)
+        }
+        if self.supportsProviderFeatures {
+            enqueueProviderRefresh(trigger: options.providerTrigger)
+        }
 
         if options.refreshProxyGroupsAfterBootstrap {
             await self.refreshProxyGroupsAfterRestart()

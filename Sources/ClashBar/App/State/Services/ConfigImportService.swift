@@ -2,6 +2,7 @@ import Foundation
 
 struct ConfigImportService {
     private let maxRemoteConfigBytes = 5 * 1024 * 1024
+    private let supportedExtensions = ["yaml", "yml", "json"]
 
     func writeConfigData(_ data: Data, to targetURL: URL) throws {
         guard !data.isEmpty else {
@@ -23,7 +24,7 @@ struct ConfigImportService {
         if ext.isEmpty {
             return "\(candidate).yaml"
         }
-        guard ext == "yaml" || ext == "yml" else { return nil }
+        guard self.supportedExtensions.contains(ext) else { return nil }
         return candidate
     }
 
@@ -32,7 +33,7 @@ struct ConfigImportService {
         guard !rawName.isEmpty else { return "remote-config.yaml" }
 
         let ext = (rawName as NSString).pathExtension.lowercased()
-        if ext == "yaml" || ext == "yml" {
+        if self.supportedExtensions.contains(ext) {
             return rawName
         }
 

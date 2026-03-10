@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="${APP_NAME:-ClashBar}"
+APP_NAME="${APP_NAME:-SBar}"
 TARGET_ARCH="${TARGET_ARCH:-}"
 MIHOMO_REPO="${MIHOMO_REPO:-MetaCubeX/mihomo}"
 MIHOMO_VERSION="${MIHOMO_VERSION:-}"

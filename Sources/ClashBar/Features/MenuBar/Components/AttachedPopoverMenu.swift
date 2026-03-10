@@ -77,16 +77,16 @@ struct AttachedPopoverMenu<Label: View, Content: View>: View {
             .padding(T.space8)
             .background(
                 RoundedRectangle(cornerRadius: T.cornerRadius, style: .continuous)
-                    .fill(.regularMaterial))
+                    .fill(Color(nsColor: .windowBackgroundColor).opacity(0.96)))
             .overlay {
                 RoundedRectangle(cornerRadius: T.cornerRadius, style: .continuous)
-                    .stroke(Color(nsColor: .separatorColor).opacity(0.46), lineWidth: T.stroke)
+                    .stroke(Color(nsColor: .separatorColor).opacity(0.32), lineWidth: T.stroke)
             }
             .shadow(
-                color: Color(nsColor: .shadowColor).opacity(T.Shadow.standard.opacity),
-                radius: T.Shadow.standard.radius,
+                color: Color.black.opacity(0.18),
+                radius: 18,
                 x: T.Shadow.standard.x,
-                y: T.Shadow.standard.y)
+                y: 10)
         }
     }
 
@@ -150,7 +150,7 @@ struct AttachedPopoverMenuItem: View {
     }
 
     private var itemBackground: Color {
-        self.isHovered ? Color(nsColor: .selectedContentBackgroundColor) : .clear
+        self.isHovered ? Color(nsColor: .selectedContentBackgroundColor).opacity(0.78) : .clear
     }
 }
 

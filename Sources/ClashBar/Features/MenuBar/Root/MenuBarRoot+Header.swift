@@ -2,112 +2,109 @@ import SwiftUI
 
 extension MenuBarRoot {
     var topHeader: some View {
-        HStack(alignment: .center, spacing: MenuBarLayoutTokens.space8) {
-            HStack(alignment: .center, spacing: MenuBarLayoutTokens.space8) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                        .fill(nativeControlFill.opacity(MenuBarLayoutTokens.Opacity.solid))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                                .stroke(
-                                    nativeControlBorder.opacity(MenuBarLayoutTokens.Opacity.solid),
-                                    lineWidth: MenuBarLayoutTokens.stroke)
+        VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space6) {
+            HStack(alignment: .top, spacing: MenuBarLayoutTokens.space6) {
+                HStack(alignment: .center, spacing: MenuBarLayoutTokens.space6) {
+                    ZStack {
+                        RoundedRectangle(
+                            cornerRadius: MenuBarLayoutTokens.cardRadius,
+                            style: .continuous)
+                            .fill(nativeAccent.opacity(0.12))
+                            .overlay {
+                                RoundedRectangle(
+                                    cornerRadius: MenuBarLayoutTokens.cardRadius,
+                                    style: .continuous)
+                                    .stroke(nativeAccent.opacity(0.22), lineWidth: MenuBarLayoutTokens.stroke)
+                            }
+
+                        if let brandImage = BrandIcon.image {
+                            Image(nsImage: brandImage)
+                                .resizable()
+                                .interpolation(.high)
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                        } else {
+                            Image(systemName: "bolt.horizontal.circle.fill")
+                                .font(.app(size: MenuBarLayoutTokens.FontSize.hero, weight: .bold))
+                                .foregroundStyle(nativeAccent)
                         }
-
-                    if let brandImage = BrandIcon.image {
-                        Image(nsImage: brandImage)
-                            .resizable()
-                            .interpolation(.high)
-                            .scaledToFit()
-                            .frame(width: MenuBarLayoutTokens.rowHeight, height: MenuBarLayoutTokens.rowHeight)
-                    } else {
-                        Image(systemName: "paperplane.fill")
-                            .renderingMode(.template)
-                            .symbolRenderingMode(.monochrome)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: MenuBarLayoutTokens.rowHeight, height: MenuBarLayoutTokens.rowHeight)
-                            .foregroundStyle(nativeAccent)
                     }
-                }
-                .frame(width: MenuBarLayoutTokens.rowHeight, height: MenuBarLayoutTokens.rowHeight)
+                    .frame(width: 42, height: 42)
 
-                VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space4) {
-                    HStack(spacing: MenuBarLayoutTokens.space6) {
-                        Text("ClashBar")
-                            .font(.app(size: MenuBarLayoutTokens.FontSize.title, weight: .semibold))
+                    VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space2) {
+                        Text("SBar")
+                            .font(.app(size: MenuBarLayoutTokens.FontSize.title, weight: .bold))
                             .foregroundStyle(nativePrimaryLabel)
 
-                        HStack(spacing: MenuBarLayoutTokens.space1) {
-                            Circle()
-                                .fill(statusColor)
-                                .frame(width: MenuBarLayoutTokens.space4, height: MenuBarLayoutTokens.space4)
-                            Text(runtimeBadgeText)
-                                .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
-                                .foregroundStyle(nativeSecondaryLabel)
-                        }
-                        .padding(.horizontal, MenuBarLayoutTokens.space6)
-                        .padding(.vertical, MenuBarLayoutTokens.space2)
-                        .background(nativeControlFill.opacity(MenuBarLayoutTokens.Opacity.solid), in: Capsule())
-                        .overlay {
-                            Capsule().stroke(
-                                nativeControlBorder.opacity(MenuBarLayoutTokens.Theme.Dark.borderEmphasis),
-                                lineWidth: MenuBarLayoutTokens.stroke)
+                        Text(appState.runtimeStatusText)
+                            .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+                            .foregroundStyle(nativeSecondaryLabel)
+                    }
+                }
+
+                Spacer(minLength: MenuBarLayoutTokens.space6)
+
+                HStack(spacing: MenuBarLayoutTokens.space2) {
+                    self.headerToolbarButton("arrow.clockwise", label: appState.primaryCoreActionLabel) {
+                        await appState.performPrimaryCoreAction()
+                    }
+                    .disabled(!appState.isPrimaryCoreActionEnabled)
+                    .opacity(appState.isPrimaryCoreActionEnabled ? 1 : 0.56)
+
+                    self.headerToolbarButton(
+                        appState.isRuntimeRunning ? "stop.fill" : "play.fill",
+                        label: appState.isRuntimeRunning ? tr("ui.action.stop") : tr("app.primary.start"),
+                        tint: appState.isRuntimeRunning ? nativeWarning : nativePositive)
+                    {
+                        if appState.isRuntimeRunning {
+                            await appState.stopCore()
+                        } else {
+                            await appState.startCore(trigger: .manual)
                         }
                     }
+                    .disabled(appState.isCoreActionProcessing)
+                    .opacity(appState.isCoreActionProcessing ? 0.56 : 1)
 
-                    HStack(spacing: MenuBarLayoutTokens.space6) {
-                        self.headerControllerLink(
-                            symbol: "network",
-                            text: appState.externalControllerDisplay)
-                        if appState.isExternalControllerWildcardIPv4 {
-                            self.headerControllerWarningIcon
-                        }
+                    self.headerToolbarButton(
+                        "rectangle.portrait.and.arrow.right",
+                        label: tr("ui.action.quit"),
+                        tint: nativeCritical)
+                    {
+                        await appState.quitApp()
                     }
                 }
             }
 
-            Spacer(minLength: MenuBarLayoutTokens.space6)
+            HStack(spacing: MenuBarLayoutTokens.space4) {
+                self.headerStatusPill
 
-            HStack(spacing: MenuBarLayoutTokens.space6) {
-                self.compactTopIcon("arrow.clockwise", label: appState.primaryCoreActionLabel) {
-                    await appState.performPrimaryCoreAction()
-                }
-                .disabled(!appState.isPrimaryCoreActionEnabled)
-                .opacity(appState.isPrimaryCoreActionEnabled ? 1 : 0.6)
+                self.headerControllerLink(
+                    symbol: "link",
+                    text: appState.externalControllerDisplay)
 
-                self.compactTopIcon(
-                    appState.isRuntimeRunning ? "stop.circle" : "play.circle",
-                    label: appState.isRuntimeRunning ? tr("ui.action.stop") : tr("app.primary.start"))
-                {
-                    if appState.isRuntimeRunning {
-                        await appState.stopCore()
-                    } else {
-                        await appState.startCore(trigger: .manual)
-                    }
-                }
-                .disabled(appState.isCoreActionProcessing)
-                .opacity(appState.isCoreActionProcessing ? 0.6 : 1)
-
-                self.compactTopIcon("rectangle.portrait.and.arrow.right", label: tr("ui.action.quit"), warning: true) {
-                    await appState.quitApp()
+                if appState.isExternalControllerWildcardIPv4 {
+                    self.headerControllerWarningIcon
                 }
             }
         }
-        .padding(.vertical, MenuBarLayoutTokens.space8)
+        .padding(MenuBarLayoutTokens.sectionInset)
+        .background(self.sectionCardBackground(prominent: true))
     }
 
     func headerMetaLabel(symbol: String, text: String) -> some View {
         HStack(spacing: MenuBarLayoutTokens.space4) {
             Image(systemName: symbol)
-                .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+                .font(.app(size: MenuBarLayoutTokens.FontSize.micro, weight: .semibold))
                 .foregroundStyle(nativeTertiaryLabel)
             Text(text)
                 .lineLimit(1)
                 .truncationMode(.middle)
         }
-        .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+        .font(.appMono(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
         .foregroundStyle(nativeSecondaryLabel)
+        .padding(.horizontal, MenuBarLayoutTokens.space6)
+        .padding(.vertical, MenuBarLayoutTokens.space4)
+        .background(self.nativeBadgeCapsule())
     }
 
     @ViewBuilder
@@ -126,12 +123,48 @@ extension MenuBarRoot {
         }
     }
 
+    var headerStatusPill: some View {
+        HStack(spacing: MenuBarLayoutTokens.space4) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 8, height: 8)
+
+            Text(runtimeBadgeText)
+                .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
+                .foregroundStyle(nativePrimaryLabel)
+        }
+        .padding(.horizontal, MenuBarLayoutTokens.space6)
+        .padding(.vertical, MenuBarLayoutTokens.space4)
+        .background(self.softTintBackground(statusColor, intensity: 1.2))
+    }
+
     var headerControllerWarningIcon: some View {
         Image(systemName: "exclamationmark.triangle.fill")
             .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
             .foregroundStyle(nativeWarning)
+            .padding(.horizontal, MenuBarLayoutTokens.space6)
+            .padding(.vertical, MenuBarLayoutTokens.space4)
+            .background(self.softTintBackground(nativeWarning))
             .help("external-controller is 0.0.0.0 and can be accessed from your LAN.")
             .accessibilityLabel("Warning: external-controller is bound to 0.0.0.0")
+    }
+
+    func headerToolbarButton(
+        _ symbol: String,
+        label: String,
+        tint: Color? = nil,
+        action: @escaping () async -> Void) -> some View
+    {
+        self.compactAsyncIconButton(
+            symbol: symbol,
+            label: label,
+            tint: (tint ?? nativeInfo).opacity(MenuBarLayoutTokens.Opacity.solid),
+            role: nil,
+            isLoading: false,
+            size: 28,
+            fontSize: MenuBarLayoutTokens.FontSize.caption,
+            hierarchicalSymbol: true,
+            action: action)
     }
 
     func makeMetaCubeXDSetupURL(controller: String, secret: String?) -> URL? {

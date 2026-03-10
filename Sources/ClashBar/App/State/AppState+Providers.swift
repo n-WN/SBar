@@ -16,12 +16,20 @@ extension AppState {
     }
 
     func updateRuleProvider(name: String) async {
+        guard self.supportsProviderFeatures else {
+            await self.refreshProvidersAndRules()
+            return
+        }
         await self.runSingleProviderUpdate(
             actionName: tr("log.action_name.update_rule_provider", name),
             request: .updateRuleProvider(name: name))
     }
 
     func refreshRuleProviders() async {
+        guard self.supportsProviderFeatures else {
+            await self.refreshProvidersAndRules()
+            return
+        }
         guard !isRuleProvidersRefreshing else { return }
         isRuleProvidersRefreshing = true
         defer { isRuleProvidersRefreshing = false }
@@ -45,6 +53,7 @@ extension AppState {
     }
 
     func updateProxyProvider(name: String) async {
+        guard self.supportsProviderFeatures else { return }
         guard !providerUpdating.contains(name) else { return }
         providerUpdating.insert(name)
         defer { providerUpdating.remove(name) }
@@ -55,6 +64,7 @@ extension AppState {
     }
 
     func testProxyProviderNode(provider: String, node: String) async {
+        guard self.supportsProviderFeatures else { return }
         let key = self.providerNodeKey(provider: provider, node: node)
         providerNodeTesting.insert(key)
         defer { providerNodeTesting.remove(key) }
@@ -79,6 +89,7 @@ extension AppState {
     }
 
     func testAllProxyProviderNodes(provider: String) async {
+        guard self.supportsProviderFeatures else { return }
         providerBatchTesting.insert(provider)
         defer { providerBatchTesting.remove(provider) }
 
@@ -159,6 +170,7 @@ extension AppState {
     }
 
     func ensureProviderNodesLoaded(provider: String) async {
+        guard self.supportsProviderFeatures else { return }
         guard let current = proxyProvidersDetail[provider], current.proxies?.isEmpty != false else { return }
 
         do {
@@ -171,18 +183,26 @@ extension AppState {
     }
 
     private func pruneProviderNodeLatencies(provider: String, allowedNodes: Set<String>) {
-        guard var existing = providerNodeLatencies[provider] else { return }
-        existing = existing.filter { allowedNodes.contains($0.key) }
-        providerNodeLatencies[provider] = existing
+        guard let existing = providerNodeLatencies[provider] else { return }
+        let filtered = existing.filter { allowedNodes.contains($0.key) }
+        guard filtered != existing else { return }
+        providerNodeLatencies[provider] = filtered
     }
 
     private func applyRefreshedProviderDetail(provider: String, detail: ProviderDetail) {
-        proxyProvidersDetail[provider] = self.sanitizedProviderDetail(detail, includeNodes: true)
+        let sanitized = self.sanitizedProviderDetail(detail, includeNodes: true)
+        if proxyProvidersDetail[provider] != sanitized {
+            proxyProvidersDetail[provider] = sanitized
+        }
         self.applyProviderHealthcheckDelays(provider: provider, detail: detail)
         self.pruneProviderNodeLatencies(provider: provider, allowedNodes: Set(detail.proxies?.map(\.name) ?? []))
     }
 
     func enqueueProviderRefresh(trigger: ProviderRefreshTrigger) {
+        guard self.supportsProviderFeatures else {
+            self.resetProviderStateIfNeeded()
+            return
+        }
         self.cancelProviderRefresh(reason: "superseded")
         providerRefreshGeneration += 1
         let generation = providerRefreshGeneration
@@ -339,6 +359,25 @@ extension AppState {
     }
 
     func refreshProvidersAndRules() async {
+        guard self.supportsProviderFeatures else {
+            await runRefresh {
+                let client = try self.clientOrThrow()
+                let rules: RulesSummary = try await client.request(.rules)
+
+                let didResetProviders = self.resetProviderStateIfNeeded()
+                var didChangeRules = false
+                if self.ruleItems != rules.rules {
+                    self.ruleItems = rules.rules
+                    didChangeRules = true
+                }
+                if didResetProviders || didChangeRules {
+                    self.bumpRulesRevision()
+                }
+                self.assignIfChanged(\.rulesCount, to: rules.totalCount)
+            }
+            return
+        }
+
         await runRefresh {
             let client = try self.clientOrThrow()
             async let proxyProvidersTask: ProviderSummary = client.request(.proxyProviders)
@@ -360,13 +399,24 @@ extension AppState {
                     incoming: detail)
             }
 
-            self.proxyProvidersDetail = nextProxyProviders
-            self.ruleProviders = ruleProviders.providers
-            self.ruleItems = rules.rules
+            self.assignIfChanged(\.proxyProvidersDetail, to: nextProxyProviders)
 
-            self.providerProxyCount = filteredProxyProviders.count
-            self.providerRuleCount = ruleProviders.providers.count
-            self.rulesCount = rules.totalCount
+            var didChangeRules = false
+            if self.ruleProviders != ruleProviders.providers {
+                self.ruleProviders = ruleProviders.providers
+                didChangeRules = true
+            }
+            if self.ruleItems != rules.rules {
+                self.ruleItems = rules.rules
+                didChangeRules = true
+            }
+            if didChangeRules {
+                self.bumpRulesRevision()
+            }
+
+            self.assignIfChanged(\.providerProxyCount, to: filteredProxyProviders.count)
+            self.assignIfChanged(\.providerRuleCount, to: ruleProviders.providers.count)
+            self.assignIfChanged(\.rulesCount, to: rules.totalCount)
 
             let currentNames = Set(filteredProxyProviders.keys)
             self.expandedProxyProviders = self.expandedProxyProviders.intersection(currentNames)
@@ -382,14 +432,14 @@ extension AppState {
     }
 
     private func setProviderNodeLatency(provider: String, node: String, value: Int) {
-        // DRY: centralize map upsert logic for provider-node latency writes.
+        if providerNodeLatencies[provider]?[node] == value { return }
         var map = providerNodeLatencies[provider] ?? [:]
         map[node] = value
         providerNodeLatencies[provider] = map
     }
 
     private func updateProvidersSequential(
-        client: MihomoAPIClient,
+        client: CoreAPIClient,
         names: [String],
         request: (String) -> Endpoint,
         onError: (String, Error) -> String,
@@ -435,5 +485,34 @@ extension AppState {
             try await self.clientOrThrow().requestNoResponse(request)
             await self.refreshProvidersAndRules()
         }
+    }
+
+    @discardableResult
+    private func resetProviderStateIfNeeded() -> Bool {
+        var didResetRules = false
+
+        self.assignIfChanged(\.providerProxyCount, to: 0)
+        self.assignIfChanged(\.providerRuleCount, to: 0)
+
+        if !proxyProvidersDetail.isEmpty { proxyProvidersDetail.removeAll(keepingCapacity: false) }
+        if !expandedProxyProviders.isEmpty { expandedProxyProviders.removeAll(keepingCapacity: false) }
+        if !providerNodeLatencies.isEmpty { providerNodeLatencies.removeAll(keepingCapacity: false) }
+        if !providerNodeTesting.isEmpty { providerNodeTesting.removeAll(keepingCapacity: false) }
+        if !providerBatchTesting.isEmpty { providerBatchTesting.removeAll(keepingCapacity: false) }
+        if !providerUpdating.isEmpty { providerUpdating.removeAll(keepingCapacity: false) }
+
+        if !ruleProviders.isEmpty {
+            ruleProviders.removeAll(keepingCapacity: false)
+            didResetRules = true
+        }
+
+        if providerRefreshStatus.phase != .idle {
+            providerRefreshStatus = .idle
+        }
+        if isRuleProvidersRefreshing {
+            isRuleProvidersRefreshing = false
+        }
+
+        return didResetRules
     }
 }

@@ -2,6 +2,8 @@ import Foundation
 
 @MainActor
 final class ConfigDirectoryManager {
+    static let supportedExtensions = ["yaml", "yml", "json"]
+
     private let fm = FileManager.default
     private let workingDirectoryManager: WorkingDirectoryManager
 
@@ -42,7 +44,7 @@ final class ConfigDirectoryManager {
         let safeConfig = try? self.workingDirectoryManager.normalizeAndValidateWithinRoot(url, mustBeDirectory: false)
         guard let safeConfig,
               safeConfig.deletingLastPathComponent() == configDirectory,
-              ["yaml", "yml"].contains(safeConfig.pathExtension.lowercased())
+              Self.supportedExtensions.contains(safeConfig.pathExtension.lowercased())
         else {
             return
         }
@@ -67,7 +69,7 @@ final class ConfigDirectoryManager {
             let isRegularFile = (try? fileURL.resourceValues(forKeys: Set(keys)).isRegularFile) ?? false
             guard isRegularFile else { continue }
             let ext = fileURL.pathExtension.lowercased()
-            guard ext == "yaml" || ext == "yml" else { continue }
+            guard Self.supportedExtensions.contains(ext) else { continue }
             files.append(fileURL)
         }
 

@@ -5,14 +5,14 @@ private typealias T = MenuBarLayoutTokens
 
 extension MenuBarRoot {
     var quickRowTrailingColumnWidth: CGFloat {
-        min(170, max(126, contentWidth * 0.44))
+        min(120, max(88, contentWidth * 0.34))
     }
 
     var proxyTabBody: some View {
         VStack(alignment: .leading, spacing: T.space6) {
             self.trafficOverview
             self.proxyQuickRows
-            if !appState.sortedProxyProviderNames.isEmpty {
+            if appState.supportsProviderFeatures, !appState.sortedProxyProviderNames.isEmpty {
                 proxyProvidersSection
             }
             proxyGroupsSection
@@ -22,9 +22,11 @@ extension MenuBarRoot {
 
     var trafficOverview: some View {
         let sparklineHeight: CGFloat = 64
-        let sparklineHorizontalInset = T.space4
+        let sparklineHorizontalInset = T.space2
 
         return ZStack {
+            self.sectionInnerSurfaceBackground(prominent: true)
+
             TrafficSparklineView(
                 upValues: appState.trafficHistoryUp,
                 downValues: appState.trafficHistoryDown)
@@ -68,11 +70,13 @@ extension MenuBarRoot {
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
-            .padding(.horizontal, T.space4)
+            .padding(.horizontal, T.space2)
             .padding(.vertical, T.space2)
         }
         .frame(height: sparklineHeight)
-        .padding(.top, T.space2)
+        .clipShape(RoundedRectangle(cornerRadius: T.innerCardRadius, style: .continuous))
+        .padding(T.sectionInset)
+        .background(self.sectionCardBackground(prominent: true))
     }
 
     func cornerMetric(
@@ -96,7 +100,7 @@ extension MenuBarRoot {
     }
 
     var proxyQuickRows: some View {
-        VStack(spacing: 0) {
+        self.sectionInnerListSurface {
             AttachedPopoverMenu {
                 self.quickRowContent(
                     title: tr("ui.quick.switch_config"),
@@ -149,6 +153,10 @@ extension MenuBarRoot {
             }
             .buttonStyle(.plain)
 
+            Rectangle()
+                .fill(self.nativeSeparator)
+                .frame(height: T.stroke)
+
             self.quickToggleRow(
                 title: tr("ui.quick.system_proxy"),
                 symbol: "network",
@@ -161,6 +169,10 @@ extension MenuBarRoot {
                         Task { await appState.toggleSystemProxy(value) }
                     }))
 
+            Rectangle()
+                .fill(self.nativeSeparator)
+                .frame(height: T.stroke)
+
             self.quickToggleRow(
                 title: tr("ui.quick.tun_mode"),
                 symbol: "shield.lefthalf.filled",
@@ -172,6 +184,10 @@ extension MenuBarRoot {
                     set: { value in
                         Task { await appState.toggleTunMode(value) }
                     }))
+
+            Rectangle()
+                .fill(self.nativeSeparator)
+                .frame(height: T.stroke)
 
             Button {
                 appState.copyProxyCommand()
@@ -190,6 +206,8 @@ extension MenuBarRoot {
             .buttonStyle(.plain)
             .onHover { hoveringCopyRow = $0 }
         }
+        .padding(T.denseSectionInset)
+        .background(self.sectionCardBackground())
     }
 
     func quickRowContent(
@@ -210,7 +228,7 @@ extension MenuBarRoot {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, T.space4)
-        .padding(.vertical, T.space2)
+        .padding(.vertical, T.space4)
     }
 
     // swiftlint:disable:next function_parameter_count
@@ -237,11 +255,9 @@ extension MenuBarRoot {
     }
 
     func quickIcon(symbol: String, foreground: Color, background: Color) -> some View {
-        RoundedRectangle(cornerRadius: T.cornerRadius, style: .continuous)
+        RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
             .fill(background)
-            .frame(
-                width: T.rowLeadingIcon,
-                height: T.rowLeadingIcon)
+            .frame(width: 26, height: 26)
             .overlay {
                 Image(systemName: symbol)
                     .font(.app(size: T.FontSize.body, weight: .semibold))

@@ -6,16 +6,21 @@ private typealias T = MenuBarLayoutTokens
 extension MenuBarRoot {
     func settingsCardHeader(_ title: String, symbol: String) -> some View {
         HStack(spacing: T.space6) {
-            Image(systemName: symbol)
-                .font(.app(size: T.FontSize.caption, weight: .semibold))
-                .foregroundStyle(nativeTertiaryLabel)
+            RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                .fill(self.nativeBadgeFill)
+                .frame(width: 24, height: 24)
+                .overlay {
+                    Image(systemName: symbol)
+                        .font(.app(size: T.FontSize.caption, weight: .semibold))
+                        .foregroundStyle(nativeTertiaryLabel)
+                }
             Text(title)
-                .font(.app(size: T.FontSize.body, weight: .bold))
+                .font(.app(size: T.FontSize.caption, weight: .bold))
                 .foregroundStyle(nativeTertiaryLabel)
                 .textCase(.uppercase)
             Spacer(minLength: 0)
         }
-        .menuRowPadding(vertical: T.space2)
+        .menuRowPadding(vertical: T.space4)
     }
 
     func settingsRowLabel(symbol: String, title: String) -> some View {
@@ -41,6 +46,22 @@ extension MenuBarRoot {
                 .labelsHidden()
                 .toggleStyle(.switch)
                 .controlSize(.small)
+        }
+        .menuRowPadding(vertical: T.space4)
+    }
+
+    func settingsValueRow(_ title: String, symbol: String, valueText: String) -> some View {
+        HStack(spacing: T.space8) {
+            self.settingsRowLabel(symbol: symbol, title: title)
+                .layoutPriority(1)
+            Spacer(minLength: 0)
+            Text(valueText)
+                .font(.appMono(size: T.FontSize.caption, weight: .medium))
+                .foregroundStyle(nativeSecondaryLabel)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: min(168, max(104, contentWidth * 0.50)), alignment: .trailing)
         }
         .menuRowPadding(vertical: T.space4)
     }
@@ -71,12 +92,19 @@ extension MenuBarRoot {
                 }
                 .font(.app(size: T.FontSize.caption, weight: .medium))
                 .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.horizontal, T.space6)
+                .padding(.vertical, T.space4)
+                .background(
+                    RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                        .fill(self.cardFillColor.opacity(0.9))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                                .stroke(self.cardBorderColor.opacity(0.72), lineWidth: T.stroke)
+                        })
             } content: { dismiss in
                 options(dismiss)
             }
             .frame(width: resolvedControlWidth, alignment: .trailing)
-            .buttonStyle(.bordered)
-            .controlSize(.small)
         }
         .menuRowPadding(vertical: T.space4)
     }
@@ -138,9 +166,17 @@ extension MenuBarRoot {
                 Image(systemName: symbol)
             }
             .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, T.space6)
+            .padding(.vertical, T.space4)
+            .background(
+                RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                    .fill(self.cardFillColor.opacity(0.9))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                            .stroke(self.cardBorderColor.opacity(0.72), lineWidth: T.stroke)
+                    })
         }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
+        .buttonStyle(.plain)
         .disabled(!maintenanceActionEnabled)
         .opacity(maintenanceActionEnabled ? 1 : 0.62)
     }
@@ -159,10 +195,7 @@ extension MenuBarRoot {
             Spacer(minLength: 0)
         }
         .menuRowPadding(vertical: T.space4)
-        .overlay {
-            RoundedRectangle(cornerRadius: T.cornerRadius, style: .continuous)
-                .stroke(color.opacity(0.26), lineWidth: T.stroke)
-        }
+        .background(self.softTintBackground(color))
     }
 
     func statusBarModeLabel(_ mode: StatusBarDisplayMode) -> String {

@@ -5,68 +5,71 @@ extension MenuBarRoot {
         let visibleRules = self.visibleRules
         let providerLookup = self.ruleProviderLookup
 
-        return VStack(alignment: .leading, spacing: 0) {
+        return VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space6) {
             HStack(spacing: 0) {
                 HStack(spacing: MenuBarLayoutTokens.space8) {
                     self.rulesStatChip(title: tr("ui.rule.stats.rules"), value: "\(appState.rulesCount)")
-                    self.rulesStatChip(title: tr("ui.rule.stats.sets"), value: "\(appState.providerRuleCount)")
+                    if appState.supportsProviderFeatures {
+                        self.rulesStatChip(title: tr("ui.rule.stats.sets"), value: "\(appState.providerRuleCount)")
+                    }
                 }
 
                 Spacer(minLength: 0)
-                self.rulesRefreshButton
-            }
-            .padding(.vertical, MenuBarLayoutTokens.space6)
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(nativeSeparator)
-                    .frame(height: MenuBarLayoutTokens.stroke)
-            }
-
-            HStack(spacing: 0) {
-                Color.clear.frame(width: 24)
-                Text(tr("ui.rules.column.target_type"))
-                    .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
-                    .foregroundStyle(nativeTertiaryLabel)
-                    .frame(width: 120, alignment: .leading)
-                Text(tr("ui.rules.column.policy"))
-                    .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
-                    .foregroundStyle(nativeTertiaryLabel)
-                    .frame(width: 90, alignment: .leading)
-                Text(tr("ui.rules.column.stats"))
-                    .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
-                    .foregroundStyle(nativeTertiaryLabel)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .textCase(.uppercase)
-            .padding(.horizontal, MenuBarLayoutTokens.space4)
-            .padding(.vertical, MenuBarLayoutTokens.space6)
-            .background(nativeControlFill.opacity(0.35))
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(nativeSeparator)
-                    .frame(height: MenuBarLayoutTokens.stroke)
-            }
-
-            if visibleRules.isEmpty {
-                Text(tr("ui.empty.rules"))
-                    .font(.app(size: MenuBarLayoutTokens.FontSize.body, weight: .regular))
-                    .foregroundStyle(nativeSecondaryLabel)
-                    .padding(.horizontal, MenuBarLayoutTokens.space4)
-                    .padding(.vertical, MenuBarLayoutTokens.space8)
-                    .frame(maxWidth: .infinity, minHeight: 52, alignment: .topLeading)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(visibleRules.enumerated()), id: \.offset) { index, rule in
-                        self.rulesRow(rule: rule, index: index, providerLookup: providerLookup)
-
-                        if index < visibleRules.count - 1 {
-                            Rectangle()
-                                .fill(nativeSeparator)
-                                .frame(height: MenuBarLayoutTokens.stroke)
-                        }
-                    }
+                if appState.supportsProviderFeatures {
+                    self.rulesRefreshButton
+                } else {
+                    self.genericRulesRefreshButton
                 }
             }
+            .padding(MenuBarLayoutTokens.sectionInset)
+            .background(self.sectionCardBackground())
+
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    Color.clear.frame(width: 24)
+                    Text(tr("ui.rules.column.target_type"))
+                        .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+                        .foregroundStyle(nativeTertiaryLabel)
+                        .frame(width: 120, alignment: .leading)
+                    Text(tr("ui.rules.column.policy"))
+                        .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+                        .foregroundStyle(nativeTertiaryLabel)
+                        .frame(width: 90, alignment: .leading)
+                    Text(tr("ui.rules.column.stats"))
+                        .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .medium))
+                        .foregroundStyle(nativeTertiaryLabel)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .textCase(.uppercase)
+                .padding(.horizontal, MenuBarLayoutTokens.space6)
+                .padding(.vertical, MenuBarLayoutTokens.space6)
+                .background(self.cardFillColor.opacity(0.72))
+                .clipShape(RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cardRadius, style: .continuous))
+
+                if visibleRules.isEmpty {
+                    Text(tr("ui.empty.rules"))
+                        .font(.app(size: MenuBarLayoutTokens.FontSize.body, weight: .regular))
+                        .foregroundStyle(nativeSecondaryLabel)
+                        .padding(.horizontal, MenuBarLayoutTokens.space4)
+                        .padding(.vertical, MenuBarLayoutTokens.space8)
+                        .frame(maxWidth: .infinity, minHeight: 52, alignment: .topLeading)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(visibleRules.enumerated()), id: \.offset) { index, rule in
+                            self.rulesRow(rule: rule, index: index, providerLookup: providerLookup)
+
+                            if index < visibleRules.count - 1 {
+                                Rectangle()
+                                    .fill(nativeSeparator)
+                                    .frame(height: MenuBarLayoutTokens.stroke)
+                            }
+                        }
+                    }
+                    .padding(.top, MenuBarLayoutTokens.space4)
+                }
+            }
+            .padding(MenuBarLayoutTokens.denseSectionInset)
+            .background(self.sectionCardBackground())
         }
     }
 
@@ -80,7 +83,8 @@ extension MenuBarRoot {
                 .foregroundStyle(nativePrimaryLabel)
         }
         .padding(.horizontal, MenuBarLayoutTokens.space6)
-        .padding(.vertical, MenuBarLayoutTokens.space2)
+        .padding(.vertical, MenuBarLayoutTokens.space4)
+        .background(self.nativeBadgeCapsule())
     }
 
     var rulesRefreshButton: some View {
@@ -94,6 +98,17 @@ extension MenuBarRoot {
         }
         .help(tr("ui.action.refresh"))
         .opacity(appState.isRuleProvidersRefreshing ? 0.6 : 1)
+    }
+
+    var genericRulesRefreshButton: some View {
+        self.compactTopIcon(
+            "arrow.clockwise",
+            label: tr("ui.action.refresh"),
+            toneOverride: nativeInfo)
+        {
+            await appState.refreshProvidersAndRules()
+        }
+        .help(tr("ui.action.refresh"))
     }
 
     func rulesRow(rule: RuleItem, index: Int, providerLookup: [String: ProviderDetail]) -> some View {
@@ -158,7 +173,7 @@ extension MenuBarRoot {
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(.horizontal, MenuBarLayoutTokens.space4)
-        .frame(height: MenuBarLayoutTokens.rowHeight)
+        .padding(.vertical, MenuBarLayoutTokens.space2)
         .background(nativeHoverRowBackground(hovered))
         .onHover { hoveredRuleIndex = self.nextHovered(
             current: hoveredRuleIndex, target: index, isHovering: $0) }
@@ -224,6 +239,8 @@ extension MenuBarRoot {
     }
 
     func ruleProviderLookupMap() -> [String: ProviderDetail] {
+        guard appState.supportsProviderFeatures else { return [:] }
+
         var map: [String: ProviderDetail] = [:]
         map.reserveCapacity(appState.ruleProviders.count * 2)
 

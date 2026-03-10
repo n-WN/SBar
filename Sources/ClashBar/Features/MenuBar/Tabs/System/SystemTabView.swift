@@ -5,11 +5,11 @@ private typealias T = MenuBarLayoutTokens
 
 extension MenuBarRoot {
     var settingsMenuControlWidth: CGFloat {
-        min(152, max(118, contentWidth * 0.43))
+        min(128, max(96, contentWidth * 0.42))
     }
 
     var settingsPortFieldWidth: CGFloat {
-        min(108, max(92, contentWidth * 0.30))
+        min(88, max(72, contentWidth * 0.28))
     }
 
     var maintenanceActionEnabled: Bool {
@@ -52,7 +52,7 @@ extension MenuBarRoot {
             ("ui.settings.port.redir", "arrowshape.turn.up.right", $appState.settingsRedirPort),
             ("ui.settings.port.tproxy", "shield.lefthalf.filled", $appState.settingsTProxyPort),
         ]
-        let toggleItems: [(id: String, title: String, symbol: String, isOn: Binding<Bool>)] = [
+        let appToggleItems: [(id: String, title: String, symbol: String, isOn: Binding<Bool>)] = [
             (
                 "launch-at-login",
                 tr("ui.settings.launch_at_login"),
@@ -74,6 +74,8 @@ extension MenuBarRoot {
                 Binding(
                     get: { appState.autoManageCoreOnNetworkChangeEnabled },
                     set: { appState.autoManageCoreOnNetworkChangeEnabled = $0 })),
+        ]
+        let runtimeToggleItems: [(id: String, title: String, symbol: String, isOn: Binding<Bool>)] = [
             (
                 AppState.EditableCoreSetting.allowLan.id,
                 tr("ui.settings.allow_lan"),
@@ -104,11 +106,47 @@ extension MenuBarRoot {
                     symbol: feedback.symbol)
             }
 
+            if appState.coreSourcePreference == .systemSingBox, !appState.isSystemSingBoxAvailable {
+                settingsFeedbackBanner(
+                    text: appState.systemSingBoxPath == "-"
+                        ? tr("app.core.error.system_sing_box_not_found")
+                        : tr("app.core.error.system_sing_box_missing_clash_api", appState.systemSingBoxPath),
+                    color: nativeWarning.opacity(T.Opacity.solid),
+                    symbol: "exclamationmark.circle.fill")
+            }
+
+            if !appState.supportsEditableRuntimeSettings {
+                settingsFeedbackBanner(
+                    text: tr("ui.settings.core_capability_hint.sing_box"),
+                    color: nativeInfo.opacity(T.Opacity.solid),
+                    symbol: "info.circle.fill")
+            }
+
             VStack(spacing: 0) {
                 settingsCardHeader(
                     tr("ui.section.basic_settings"),
                     symbol: "slider.horizontal.3")
-                ForEach(toggleItems, id: \.id) { item in
+
+                settingsSelectionRow(
+                    tr("ui.settings.core_source"),
+                    symbol: "cpu",
+                    valueText: self.coreSourcePreferenceLabel(appState.coreSourcePreference),
+                    options: appState.availableCoreSourcePreferences,
+                    optionTitle: self.coreSourcePreferenceLabel,
+                    isSelected: { appState.coreSourcePreference == $0 },
+                    onSelect: { preference in
+                        Task { await appState.setCoreSourcePreference(preference) }
+                    })
+                settingsValueRow(
+                    tr("ui.settings.core_binary"),
+                    symbol: "terminal",
+                    valueText: appState.coreBinaryKind.displayName)
+                settingsValueRow(
+                    tr("ui.settings.core_binary_path"),
+                    symbol: "folder",
+                    valueText: appState.coreBinaryPath)
+
+                ForEach(appToggleItems, id: \.id) { item in
                     settingsToggleRow(item.title, symbol: item.symbol, isOn: item.isOn)
                 }
                 settingsSelectionRow(
@@ -135,6 +173,18 @@ extension MenuBarRoot {
                     optionTitle: self.appearanceModeLabel,
                     isSelected: { appState.appearanceMode == $0 },
                     onSelect: appState.setAppearanceMode)
+            }
+            .padding(.horizontal, T.denseSectionInset)
+            .background(self.sectionCardBackground())
+
+            VStack(spacing: 0) {
+                settingsCardHeader(
+                    tr("ui.section.core_runtime"),
+                    symbol: "switch.2")
+
+                ForEach(runtimeToggleItems, id: \.id) { item in
+                    settingsToggleRow(item.title, symbol: item.symbol, isOn: item.isOn)
+                }
                 settingsSelectionRow(
                     tr("ui.settings.log_level"),
                     symbol: "text.alignleft",
@@ -146,6 +196,10 @@ extension MenuBarRoot {
                         Task { await appState.applyEditableCoreSetting(.logLevel, to: level.rawValue) }
                     })
             }
+            .padding(.horizontal, T.denseSectionInset)
+            .background(self.sectionCardBackground())
+            .disabled(!appState.supportsEditableRuntimeSettings)
+            .opacity(appState.supportsEditableRuntimeSettings ? 1 : 0.62)
 
             VStack(spacing: 0) {
                 settingsCardHeader(
@@ -180,6 +234,10 @@ extension MenuBarRoot {
                 }
                 .menuRowPadding(vertical: T.space4)
             }
+            .padding(.horizontal, T.denseSectionInset)
+            .background(self.sectionCardBackground())
+            .disabled(!appState.supportsEditableRuntimeSettings)
+            .opacity(appState.supportsEditableRuntimeSettings ? 1 : 0.62)
 
             VStack(spacing: 0) {
                 settingsCardHeader(
@@ -208,6 +266,17 @@ extension MenuBarRoot {
                 }
                 .menuRowPadding(vertical: T.space4)
             }
+            .padding(.horizontal, T.denseSectionInset)
+            .background(self.sectionCardBackground())
+        }
+    }
+
+    func coreSourcePreferenceLabel(_ preference: CoreSourcePreference) -> String {
+        switch preference {
+        case .appManaged:
+            tr("ui.settings.core_source.app_managed")
+        case .systemSingBox:
+            tr("ui.settings.core_source.system_sing_box")
         }
     }
 }

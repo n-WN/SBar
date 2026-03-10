@@ -12,7 +12,10 @@ extension AppState {
         mihomoLogFlushTask?.cancel()
         mihomoLogFlushTask = nil
         pendingMihomoLogs.removeAll(keepingCapacity: false)
-        errorLogs.removeAll(keepingCapacity: false)
+        if !errorLogs.isEmpty {
+            errorLogs.removeAll(keepingCapacity: false)
+            self.bumpLogsRevision()
+        }
         clashbarLogStore?.clear()
         mihomoLogStore?.clear()
     }
@@ -55,6 +58,7 @@ extension AppState {
         let maxEntries = isPanelPresented ? maxLogEntries : hiddenPanelMaxInMemoryLogEntries
         guard errorLogs.count > maxEntries else { return }
         errorLogs.removeLast(errorLogs.count - maxEntries)
+        self.bumpLogsRevision()
     }
 
     func tr(_ key: String) -> String {
@@ -93,6 +97,7 @@ extension AppState {
         if errorLogs.count > maxEntries {
             errorLogs.removeLast(errorLogs.count - maxEntries)
         }
+        self.bumpLogsRevision()
     }
 
     private func persistLogEntriesToFile(_ entries: [AppErrorLogEntry]) {

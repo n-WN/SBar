@@ -21,7 +21,7 @@ extension AppState {
 
     func startDecodableStream<Payload: Decodable>(
         kind: StreamKind,
-        makeWebSocket: @escaping (MihomoAPIClient) throws -> URLSessionWebSocketTask,
+        makeWebSocket: @escaping (CoreAPIClient) throws -> URLSessionWebSocketTask,
         onDecoded: @escaping (Payload) -> Void)
     {
         startStream(

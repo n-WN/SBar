@@ -26,6 +26,7 @@ final class AppState: ObservableObject {
 
     @Published var connectionsCount: Int = 0
     @Published var connections: [ConnectionSummary] = []
+    @Published var connectionsRevision: UInt64 = 0
 
     @Published var currentMode: CoreMode = .rule
     @Published var logLevel: String = "info"
@@ -35,7 +36,12 @@ final class AppState: ObservableObject {
     @Published var tproxyPort: Int?
     @Published var mixedPort: Int = 7890
 
-    @Published var mihomoBinaryPath: String = "-"
+    @Published var coreBinaryPath: String = "-"
+    @Published var coreBinaryKind: CoreBinaryKind = .mihomo
+    @Published var coreSourcePreference: CoreSourcePreference = .appManaged
+    @Published var systemSingBoxPath: String = "-"
+    @Published var systemSingBoxVersion: String = "-"
+    @Published var isSystemSingBoxAvailable: Bool = false
     @Published var selectedConfigName: String = "-"
     @Published var configDirectoryPath: String = "-"
     @Published var availableConfigFileNames: [String] = []
@@ -56,6 +62,7 @@ final class AppState: ObservableObject {
     @Published var providerUpdating: Set<String> = []
     @Published var ruleProviders: [String: ProviderDetail] = [:]
     @Published var ruleItems: [RuleItem] = []
+    @Published var rulesRevision: UInt64 = 0
     @Published var isRuleProvidersRefreshing: Bool = false
 
     @Published var isSystemProxyEnabled: Bool = false
@@ -68,6 +75,7 @@ final class AppState: ObservableObject {
     }
 
     @Published var errorLogs: [AppErrorLogEntry] = []
+    @Published var logsRevision: UInt64 = 0
     @Published var startupErrorMessage: String?
     @Published var coreActionState: CoreActionState = .idle
     @Published var providerRefreshStatus: ProviderRefreshStatus = .idle
@@ -251,7 +259,28 @@ final class AppState: ObservableObject {
     }
 
     var isTunToggleEnabled: Bool {
-        self.isRuntimeRunning && !self.isCoreActionProcessing && !self.isTunSyncing
+        self.supportsTunRuntimeManagement &&
+            self.isRuntimeRunning &&
+            !self.isCoreActionProcessing &&
+            !self.isTunSyncing
+    }
+
+    var supportsEditableRuntimeSettings: Bool {
+        self.coreBinaryKind.supportsEditableRuntimeSettings
+    }
+
+    var supportsTunRuntimeManagement: Bool {
+        self.coreBinaryKind.supportsTunRuntimeManagement
+    }
+
+    var supportsProviderFeatures: Bool {
+        self.coreBinaryKind.supportsProviderRefresh
+    }
+
+    var availableCoreSourcePreferences: [CoreSourcePreference] {
+        (self.isSystemSingBoxAvailable || self.coreSourcePreference == .systemSingBox)
+            ? [.appManaged, .systemSingBox]
+            : [.appManaged]
     }
 
     var autoStartCoreEnabled: Bool {
@@ -286,7 +315,7 @@ final class AppState: ObservableObject {
         !self.isCoreActionProcessing
     }
 
-    let processManager: any MihomoControlling
+    let processManager: any CoreControlling
     let configManager: ConfigDirectoryManager
     let workingDirectoryManager: WorkingDirectoryManager
     let systemProxyService: SystemProxyService
@@ -294,9 +323,9 @@ final class AppState: ObservableObject {
     let configImportService: ConfigImportService
     let appLaunchService: AppLaunchService
     let networkReachabilityMonitor: NetworkReachabilityMonitor
-    var apiClient: MihomoAPIClient?
-    var modeSwitchTransportOverride: MihomoAPITransporting?
-    var settingsPatchTransportOverride: MihomoAPITransporting?
+    var apiClient: CoreAPIClient?
+    var modeSwitchTransportOverride: CoreAPITransporting?
+    var settingsPatchTransportOverride: CoreAPITransporting?
 
     var mediumFrequencyTask: Task<Void, Never>?
     var lowFrequencyTask: Task<Void, Never>?
@@ -337,6 +366,7 @@ final class AppState: ObservableObject {
     let remoteConfigSourcesKey = "clashbar.config.remote.sources.v1"
     let lastSuccessfulConfigPathKey = "clashbar.last.success.config.path"
     let editableSettingsSnapshotKey = "clashbar.settings.editable.snapshot.v1"
+    let coreSourcePreferenceKey = "clashbar.core.source.preference.v1"
     let uiLanguageKey = "clashbar.ui.language"
     let appearanceModeKey = "clashbar.ui.appearance.mode"
     let maxLogEntries = 200
@@ -379,11 +409,11 @@ final class AppState: ObservableObject {
     var externalControllerWarningKeys: Set<String> = []
     let streamJSONDecoder = JSONDecoder()
     let initialNoCoreSetupGuideShownKey = "clashbar.core.install.guide.shown.v1"
-    let bundlesMihomoCore: Bool
+    let bundlesManagedCore: Bool
     var didPresentInitialNoCoreSetupGuide = false
 
     init(
-        processManager: (any MihomoControlling)? = nil,
+        processManager: (any CoreControlling)? = nil,
         configManager: ConfigDirectoryManager? = nil,
         workingDirectoryManager: WorkingDirectoryManager = WorkingDirectoryManager(),
         systemProxyService: SystemProxyService = SystemProxyService(),
@@ -395,7 +425,7 @@ final class AppState: ObservableObject {
         mihomoLogStore: AppLogStore? = nil,
         startBackgroundRefresh: Bool = true)
     {
-        self.processManager = processManager ?? MihomoProcessManager(workingDirectoryManager: workingDirectoryManager)
+        self.processManager = processManager ?? CoreProcessManager(workingDirectoryManager: workingDirectoryManager)
         self.workingDirectoryManager = workingDirectoryManager
         self.systemProxyService = systemProxyService
         self.tunPermissionService = tunPermissionService
@@ -405,14 +435,15 @@ final class AppState: ObservableObject {
         self.clashbarLogStore = clashbarLogStore
         self.mihomoLogStore = mihomoLogStore
         self.configManager = configManager ?? ConfigDirectoryManager(workingDirectoryManager: workingDirectoryManager)
-        self.bundlesMihomoCore = Self.resolveBundledMihomoCoreFlag()
+        self.bundlesManagedCore = Self.resolveBundledManagedCoreFlag()
         self.uiLanguage = loadPersistedUILanguage()
         self.appearanceMode = loadPersistedAppearanceMode()
+        self.coreSourcePreference = loadPersistedCoreSourcePreference()
         applyAppAppearance()
         refreshLaunchAtLoginStatus()
 
-        self.mihomoBinaryPath = self.processManager.detectedBinaryPath ?? "-"
-        if let managedProcess = self.processManager as? MihomoProcessManager {
+        if let managedProcess = self.processManager as? CoreProcessManager {
+            managedProcess.preferredCoreSource = self.coreSourcePreference
             managedProcess.onLog = { [weak self] line in
                 Task { @MainActor in
                     self?.appendMihomoLog(level: "info", message: line)
@@ -436,6 +467,7 @@ final class AppState: ObservableObject {
                 }
             }
         }
+        self.refreshCoreBinaryState()
         do {
             try self.workingDirectoryManager.bootstrapDirectories()
             clashbarLogFileURL = self.workingDirectoryManager.logsDirectoryURL.appendingPathComponent(
@@ -460,6 +492,9 @@ final class AppState: ObservableObject {
         restoreLastSuccessfulConfigIfAvailable()
         self.remoteConfigSources = loadPersistedRemoteConfigSources()
         pruneRemoteConfigSourcesIfNeeded()
+        self.autoSelectAvailableCoreSourceIfNeeded()
+        self.alignSelectedConfigWithCurrentCoreIfNeeded()
+        self.refreshCoreBinaryState()
         self.controllerUIURL = makeControllerUIURL(self.controller)
         if let persisted = loadPersistedEditableSettingsSnapshot() {
             applyEditableSettingsSnapshotToUI(persisted)
@@ -507,7 +542,7 @@ final class AppState: ObservableObject {
         providerRefreshTask?.cancel()
     }
 
-    private static func resolveBundledMihomoCoreFlag() -> Bool {
+    private static func resolveBundledManagedCoreFlag() -> Bool {
         guard let value = Bundle.main.object(forInfoDictionaryKey: "ClashBarBundlesMihomoCore") else {
             return true
         }

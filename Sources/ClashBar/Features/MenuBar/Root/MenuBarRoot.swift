@@ -16,6 +16,16 @@ enum RootTab: String, CaseIterable, Hashable {
         case .system: "ui.tab.system"
         }
     }
+
+    var symbolName: String {
+        switch self {
+        case .proxy: "bolt.horizontal.circle"
+        case .rules: "line.3.horizontal.decrease.circle"
+        case .activity: "waveform.path.ecg"
+        case .logs: "doc.text.magnifyingglass"
+        case .system: "gearshape"
+        }
+    }
 }
 
 enum LogLevelFilter: Hashable, CaseIterable {
@@ -102,22 +112,21 @@ enum NetworkSortOption: String, CaseIterable, Identifiable {
 }
 
 private struct ActivityRefreshToken: Equatable {
-    let connections: [ConnectionSummary]
+    let connectionsRevision: UInt64
     let keyword: String
     let transport: NetworkTransportFilter
     let sort: NetworkSortOption
 }
 
 private struct LogsRefreshToken: Equatable {
-    let logs: [AppErrorLogEntry]
+    let logsRevision: UInt64
     let sources: Set<AppLogSource>
     let levels: Set<LogLevelFilter>
     let keyword: String
 }
 
 private struct RulesRefreshToken: Equatable {
-    let items: [RuleItem]
-    let providers: [String: ProviderDetail]
+    let rulesRevision: UInt64
 }
 
 struct MenuBarRoot: View {
@@ -136,6 +145,7 @@ struct MenuBarRoot: View {
     @State var hoveredProxyGroupName: String?
     @State var hoveredProxyProviderName: String?
     @State var hoveredMode: CoreMode?
+    @State var hoveredTab: RootTab?
     @State var selectedLogSources: Set<AppLogSource> = Set(AppLogSource.allCases)
     @State var selectedLogLevels: Set<LogLevelFilter> = [.info, .warning, .error]
     @State var logSearchText: String = ""
@@ -150,7 +160,7 @@ struct MenuBarRoot: View {
     @AppStorage("clashbar.proxy.group.hide_hidden") var hideHiddenProxyGroups: Bool = true
 
     var contentWidth: CGFloat {
-        MenuBarLayoutTokens.panelWidth - (MenuBarLayoutTokens.space8 * 2)
+        MenuBarLayoutTokens.panelWidth - (MenuBarLayoutTokens.panelHorizontalInset * 2)
     }
 
     var language: AppLanguage {
@@ -181,6 +191,7 @@ struct MenuBarRoot: View {
             Spacer(minLength: 0)
         }
         .frame(width: MenuBarLayoutTokens.panelWidth, alignment: .topLeading)
+        .padding(MenuBarLayoutTokens.panelOuterPadding)
     }
 
     var panelContent: some View {
@@ -207,7 +218,8 @@ struct MenuBarRoot: View {
                 .reportHeight { updateSectionHeight($0, target: .footer) }
         }
         .frame(width: self.contentWidth, alignment: .topLeading)
-        .padding(.horizontal, MenuBarLayoutTokens.space8)
+        .padding(.horizontal, MenuBarLayoutTokens.panelHorizontalInset)
+        .padding(.top, MenuBarLayoutTokens.panelTopInset)
         .frame(width: MenuBarLayoutTokens.panelWidth, height: resolvedPanelHeight, alignment: .topLeading)
         .background(self.panelBackground)
         .clipShape(RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous))
@@ -235,7 +247,7 @@ struct MenuBarRoot: View {
             publishPreferredPanelHeight()
         }
         .onChange(of: ActivityRefreshToken(
-            connections: self.appState.connections,
+            connectionsRevision: self.appState.connectionsRevision,
             keyword: self.networkFilterText,
             transport: self.networkTransportFilter,
             sort: self.networkSortOption))
@@ -243,7 +255,7 @@ struct MenuBarRoot: View {
             self.refreshActivityDerivedDataIfVisible()
         }
         .onChange(of: LogsRefreshToken(
-                logs: self.appState.errorLogs,
+                logsRevision: self.appState.logsRevision,
                 sources: self.selectedLogSources,
                 levels: self.selectedLogLevels,
                 keyword: self.logSearchText))
@@ -251,8 +263,7 @@ struct MenuBarRoot: View {
             self.refreshLogsDerivedDataIfVisible()
             }
             .onChange(of: RulesRefreshToken(
-                    items: self.appState.ruleItems,
-                    providers: self.appState.ruleProviders))
+                    rulesRevision: self.appState.rulesRevision))
             { _ in
                 self.refreshRulesDerivedDataIfVisible()
                 }
@@ -276,25 +287,38 @@ struct MenuBarRoot: View {
 
     func tabContent(for tab: RootTab) -> some View {
         self.tabBody(for: tab)
-            .padding(.top, MenuBarLayoutTokens.space2)
+            .padding(.top, MenuBarLayoutTokens.space4)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     var panelBackground: some View {
         RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-            .fill(.regularMaterial)
+            .fill(self.panelShellFill)
             .overlay {
                 RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                    .stroke(nativeSeparator, lineWidth: MenuBarLayoutTokens.stroke)
+                    .stroke(self.panelShellBorder, lineWidth: MenuBarLayoutTokens.stroke)
+            }
+            .overlay(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
+                    .fill(.white.opacity(self.isDarkAppearance ? 0.03 : 0.24))
+                    .blur(radius: 30)
+                    .mask {
+                        LinearGradient(
+                            colors: [.white, .white.opacity(0)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing)
+                    }
             }
             .shadow(
-                color: Color(nsColor: .shadowColor).opacity(MenuBarLayoutTokens.Shadow.standard.opacity),
+                color: Color.black.opacity(MenuBarLayoutTokens.Shadow.standard.opacity),
                 radius: MenuBarLayoutTokens.Shadow.standard.radius,
                 x: MenuBarLayoutTokens.Shadow.standard.x,
                 y: MenuBarLayoutTokens.Shadow.standard.y)
     }
 
     func refreshDerivedData(for tab: RootTab) {
+        self.releaseInactiveDerivedData(keeping: tab)
+
         switch tab {
         case .proxy, .system:
             return
@@ -320,5 +344,24 @@ struct MenuBarRoot: View {
     func refreshRulesDerivedDataIfVisible() {
         guard self.currentTab == .rules else { return }
         self.refreshVisibleRules()
+    }
+
+    func releaseInactiveDerivedData(keeping tab: RootTab) {
+        if tab != .activity, !self.visibleConnections.isEmpty {
+            self.visibleConnections.removeAll(keepingCapacity: false)
+        }
+
+        if tab != .logs, !self.visibleLogs.isEmpty {
+            self.visibleLogs.removeAll(keepingCapacity: false)
+        }
+
+        if tab != .rules {
+            if !self.visibleRules.isEmpty {
+                self.visibleRules.removeAll(keepingCapacity: false)
+            }
+            if !self.ruleProviderLookup.isEmpty {
+                self.ruleProviderLookup.removeAll(keepingCapacity: false)
+            }
+        }
     }
 }

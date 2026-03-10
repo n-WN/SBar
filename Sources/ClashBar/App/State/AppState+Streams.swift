@@ -30,7 +30,7 @@ extension AppState {
     func startStream(
         kind: StreamKind,
         preserveReconnectState: Bool = false,
-        makeWebSocket: @escaping (MihomoAPIClient) throws -> URLSessionWebSocketTask,
+        makeWebSocket: @escaping (CoreAPIClient) throws -> URLSessionWebSocketTask,
         onPayload: @escaping (Data) -> Void)
     {
         self.cancelStream(kind, resetReconnectState: !preserveReconnectState)
@@ -236,7 +236,7 @@ extension AppState {
 
     private func applyTrafficSnapshot(_ snapshot: TrafficSnapshot) {
         self.traffic = snapshot
-        guard self.isPanelPresented else {
+        guard self.isPanelPresented, self.activeMenuTab == .proxy else {
             if !self.trafficHistoryUp.isEmpty || !self.trafficHistoryDown
                 .isEmpty || self.displayUpTotal != 0 || self.displayDownTotal != 0 || self.lastTrafficSampleAt != nil
             {
@@ -257,12 +257,11 @@ extension AppState {
 
     private func applyConnectionsSnapshot(_ snapshot: ConnectionsSnapshot) {
         let totalCount = snapshot.totalCount
-        if connectionsCount != totalCount {
-            connectionsCount = totalCount
-        }
+        self.assignIfChanged(\.connectionsCount, to: totalCount)
 
         if connections != snapshot.connections {
             connections = snapshot.connections
+            self.bumpConnectionsRevision()
         }
     }
 

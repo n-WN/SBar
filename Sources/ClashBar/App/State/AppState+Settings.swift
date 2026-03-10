@@ -56,6 +56,11 @@ extension AppState {
     }
 
     func applyEditableCoreSetting(_ setting: EditableCoreSetting, to value: Bool) async {
+        guard self.supportsEditableRuntimeSettings else {
+            self.settingsErrorMessage = tr("app.settings.error.unsupported_for_sing_box")
+            self.settingsSavedMessage = nil
+            return
+        }
         guard let keyPath = self.boolStateKeyPath(for: setting) else {
             assertionFailure("Setting \(setting.configKey) does not accept Bool updates")
             return
@@ -64,6 +69,11 @@ extension AppState {
     }
 
     func applyEditableCoreSetting(_ setting: EditableCoreSetting, to value: String) async {
+        guard self.supportsEditableRuntimeSettings else {
+            self.settingsErrorMessage = tr("app.settings.error.unsupported_for_sing_box")
+            self.settingsSavedMessage = nil
+            return
+        }
         guard let keyPath = self.stringStateKeyPath(for: setting) else {
             assertionFailure("Setting \(setting.configKey) does not accept String updates")
             return
@@ -85,6 +95,11 @@ extension AppState {
     }
 
     func applyProxyPorts(autoSaved: Bool = false) async {
+        guard self.supportsEditableRuntimeSettings else {
+            self.settingsErrorMessage = tr("app.settings.error.unsupported_for_sing_box")
+            self.settingsSavedMessage = nil
+            return
+        }
         guard let body = validatedPortPatchBody(
             fields: proxyPortFields,
             errorMessageKey: "app.settings.error.port_range",
@@ -203,6 +218,13 @@ extension AppState {
         _ overlay: EditableSettingsSnapshot,
         syncingKey: String) async
     {
+        guard self.supportsEditableRuntimeSettings else {
+            self.lastSyncedEditableSettings = overlay
+            self.persistEditableSettingsSnapshot()
+            self.cancelDeferredEditableSettingsOverlaySync()
+            return
+        }
+
         self.deferredEditableSettingsOverlay = (snapshot: overlay, syncingKey: syncingKey)
 
         if await self.applyDeferredEditableSettingsOverlayIfPossible() {
@@ -226,6 +248,12 @@ extension AppState {
         syncingKey: String,
         successMessage: String) async -> Bool
     {
+        guard self.supportsEditableRuntimeSettings else {
+            self.settingsErrorMessage = tr("app.settings.error.unsupported_for_sing_box")
+            self.settingsSavedMessage = nil
+            return false
+        }
+
         let fallback = lastSyncedEditableSettings
         let resolvedLogLevel = overlay.logLevel.trimmed.isEmpty
             ? (fallback?.logLevel ?? ConfigLogLevel.info.rawValue)
@@ -408,7 +436,7 @@ extension AppState {
         }
     }
 
-    func clientOrThrow() throws -> MihomoAPIClient {
+    func clientOrThrow() throws -> CoreAPIClient {
         if apiClient == nil {
             ensureAPIClient()
         }
@@ -418,11 +446,11 @@ extension AppState {
         throw APIError.invalidURL
     }
 
-    func modeSwitchTransport() throws -> MihomoAPITransporting {
+    func modeSwitchTransport() throws -> CoreAPITransporting {
         try self.resolvedTransport(override: modeSwitchTransportOverride)
     }
 
-    func settingsPatchTransport() throws -> MihomoAPITransporting {
+    func settingsPatchTransport() throws -> CoreAPITransporting {
         try self.resolvedTransport(override: settingsPatchTransportOverride)
     }
 
@@ -541,7 +569,7 @@ extension AppState {
         }
     }
 
-    private func resolvedTransport(override: MihomoAPITransporting?) throws -> MihomoAPITransporting {
+    private func resolvedTransport(override: CoreAPITransporting?) throws -> CoreAPITransporting {
         if let override {
             return override
         }

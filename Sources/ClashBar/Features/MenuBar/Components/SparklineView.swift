@@ -4,15 +4,21 @@ import SwiftUI
 private typealias T = MenuBarLayoutTokens
 
 struct TrafficSparklineView: View {
+    private static let baselinePointCount = 20
+
     let upValues: [Int64]
     let downValues: [Int64]
 
     var body: some View {
         GeometryReader { geo in
-            let fallbackDown = [20, 13, 18, 10, 12, 6, 12, 5, 9, 7, 4, 14, 10, 15, 8, 11, 7, 9, 5, 12].map(Int64.init)
-            let fallbackUp = [10, 7, 12, 8, 9, 4, 9, 3, 7, 5, 2, 10, 8, 11, 6, 8, 5, 7, 4, 9].map(Int64.init)
-            let downPoints = self.downValues.isEmpty ? fallbackDown : self.downValues
-            let upPoints = self.upValues.isEmpty ? fallbackUp : self.upValues
+            // For an idle/stopped core, we should display a flat baseline (0 traffic),
+            // not placeholder activity.
+            let downPoints = self.downValues.isEmpty
+                ? Array(repeating: 0, count: Self.baselinePointCount)
+                : self.downValues
+            let upPoints = self.upValues.isEmpty
+                ? Array(repeating: 0, count: Self.baselinePointCount)
+                : self.upValues
             let sharedCount = max(downPoints.count, upPoints.count)
             let normalizedDown = self.normalizePoints(downPoints, count: sharedCount)
             let normalizedUp = self.normalizePoints(upPoints, count: sharedCount)

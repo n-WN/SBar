@@ -21,9 +21,11 @@ let package = Package(
             dependencies: ["ProxyHelperShared"],
             path: "Sources/ClashBar",
             resources: [
+                .process("Resources/Assets.xcassets"),
                 .copy("Resources/bin"),
-                .copy("Resources/Brand/clashbar-icon.png"),
+                .copy("Resources/Brand"),
                 .copy("Resources/ConfigTemplates/ClashBar.yaml"),
+                .copy("Resources/ConfigTemplates/SBar.json"),
                 .process("Resources/Localization"),
             ]),
         .executableTarget(

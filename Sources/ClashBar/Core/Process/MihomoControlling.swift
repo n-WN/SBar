@@ -1,13 +1,13 @@
 import Foundation
 
-enum CoreLifecycleStatus: Equatable, Sendable {
+enum CoreLifecycleStatus: Equatable {
     case stopped
     case starting
     case running(pid: Int32)
     case failed(reason: String)
 }
 
-protocol MihomoControlling: AnyObject, Sendable {
+protocol CoreControlling: AnyObject, Sendable {
     var status: CoreLifecycleStatus { get }
     var isRunning: Bool { get }
     var detectedBinaryPath: String? { get }
@@ -24,3 +24,5 @@ protocol MihomoControlling: AnyObject, Sendable {
     @discardableResult
     func restartAsync(configPath: String, controller: String) async throws -> CoreLifecycleStatus
 }
+
+typealias MihomoControlling = CoreControlling

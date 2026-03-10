@@ -1,20 +1,17 @@
-import AppKit
 import SwiftUI
 
 extension MenuBarRoot {
     var modeAndTabSection: some View {
-        VStack(spacing: MenuBarLayoutTokens.space6) {
+        VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space6) {
             self.modeSwitcher
             self.topTabs
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(nativeSeparator).frame(height: MenuBarLayoutTokens.stroke)
-        }
+        .padding(MenuBarLayoutTokens.sectionInset)
+        .background(self.sectionCardBackground())
     }
 
     var modeSwitcher: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: MenuBarLayoutTokens.space4) {
             self.modeSegmentButton(
                 title: tr("ui.mode.rule"),
                 mode: .rule,
@@ -28,21 +25,14 @@ extension MenuBarRoot {
                 mode: .direct,
                 symbol: "paperplane")
         }
-        .padding(MenuBarLayoutTokens.space2)
-        .frame(width: contentWidth)
-        .background(
-            nativeControlFill,
-            in: RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                .stroke(nativeControlBorder, lineWidth: MenuBarLayoutTokens.stroke)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     func modeSegmentButton(title: String, mode: CoreMode, symbol: String) -> some View {
         let selected = appState.currentMode == mode
         let switchingThisMode = switchingMode == mode
         let hovered = hoveredMode == mode
+        let tint = self.modeAccent(for: mode)
 
         return Button {
             if !appState.isModeSwitchEnabled || switchingMode != nil || mode == appState.currentMode { return }
@@ -53,100 +43,107 @@ extension MenuBarRoot {
                 switchingMode = nil
             }
         } label: {
-            VStack(spacing: MenuBarLayoutTokens.space2) {
-                if switchingThisMode {
-                    ProgressView()
-                        .controlSize(.mini)
-                } else {
-                    Image(systemName: symbol)
-                        .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
+            HStack(spacing: MenuBarLayoutTokens.space4) {
+                Group {
+                    if switchingThisMode {
+                        ProgressView()
+                            .controlSize(.mini)
+                    } else {
+                        Image(systemName: symbol)
+                            .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
+                    }
                 }
+                .foregroundStyle(selected ? tint : nativeSecondaryLabel)
 
                 Text(title)
                     .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
+                    .foregroundStyle((selected || hovered) ? nativePrimaryLabel : nativeSecondaryLabel)
                     .lineLimit(1)
             }
-            .foregroundStyle((selected || hovered) ? nativePrimaryLabel : nativeSecondaryLabel)
-            .frame(maxWidth: .infinity)
-            .frame(height: MenuBarLayoutTokens.rowHeight)
-            .background(
-                RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                    .fill(
-                        selected
-                            ? nativeAccent.opacity(MenuBarLayoutTokens.Opacity.tint)
-                            :
-                            (hovered ? Color(nsColor: .selectedContentBackgroundColor)
-                                .opacity(MenuBarLayoutTokens.Opacity.tint) : .clear)))
-            .overlay {
-                if selected || hovered {
-                    RoundedRectangle(cornerRadius: MenuBarLayoutTokens.cornerRadius, style: .continuous)
-                        .stroke(
-                            selected ? nativeAccent.opacity(MenuBarLayoutTokens.Opacity.tint) : nativeControlBorder
-                                .opacity(MenuBarLayoutTokens.Theme.Dark.borderEmphasis),
-                            lineWidth: MenuBarLayoutTokens.stroke)
-                }
-            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, MenuBarLayoutTokens.space4)
+            .padding(.vertical, MenuBarLayoutTokens.space4)
+            .background(self.pillChipBackground(selected: selected, hovered: hovered, tint: tint))
         }
         .buttonStyle(.plain)
-        .onHover { hoveredMode = self.nextHovered(
-            current: hoveredMode, target: mode, isHovering: $0) }
+        .onHover { hoveredMode = self.nextHovered(current: hoveredMode, target: mode, isHovering: $0) }
     }
 
     var topTabs: some View {
-        let tabs = RootTab.allCases
-        let labels = tabs.map { self.tr($0.titleKey) }
-        let selectedIndex = Binding<Int>(
-            get: { tabs.firstIndex(of: self.currentTab) ?? 0 },
-            set: { index in
-                guard tabs.indices.contains(index) else { return }
-                self.setCurrentTabWithoutAnimation(tabs[index])
-            })
-
-        return EqualWidthSegmentedControl(labels: labels, selectedIndex: selectedIndex)
-            .frame(width: contentWidth, height: 24)
-    }
-}
-
-@MainActor
-private struct EqualWidthSegmentedControl: NSViewRepresentable {
-    let labels: [String]
-    @Binding var selectedIndex: Int
-
-    func makeNSView(context: Context) -> NSSegmentedControl {
-        let control = NSSegmentedControl(
-            labels: labels,
-            trackingMode: .selectOne,
-            target: context.coordinator,
-            action: #selector(Coordinator.segmentChanged(_:)))
-        control.segmentDistribution = .fillEqually
-        control.selectedSegment = self.selectedIndex
-        return control
-    }
-
-    func updateNSView(_ control: NSSegmentedControl, context: Context) {
-        for (index, label) in self.labels.enumerated() where control.label(forSegment: index) != label {
-            control.setLabel(label, forSegment: index)
+        HStack(spacing: MenuBarLayoutTokens.space4) {
+            ForEach(RootTab.allCases, id: \.self) { tab in
+                self.topTabButton(tab)
+                    .frame(maxWidth: .infinity)
+            }
         }
-        if control.selectedSegment != self.selectedIndex {
-            control.selectedSegment = self.selectedIndex
+        .padding(MenuBarLayoutTokens.space1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    func topTabButton(_ tab: RootTab) -> some View {
+        let selected = self.currentTab == tab
+        let hovered = self.hoveredTab == tab
+        let tint = self.tabAccent(for: tab)
+        let title = self.tr(tab.titleKey)
+
+        return Button {
+            self.setCurrentTabWithoutAnimation(tab)
+        } label: {
+            HStack(spacing: 0) {
+                Image(systemName: tab.symbolName)
+                    .font(.app(size: MenuBarLayoutTokens.FontSize.caption, weight: .semibold))
+                    .foregroundStyle(selected ? tint : nativeTertiaryLabel)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, MenuBarLayoutTokens.space4)
+            .padding(.vertical, MenuBarLayoutTokens.space4)
+            .background(self.pillChipBackground(selected: selected, hovered: hovered, tint: tint))
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
+        .onHover { self.hoveredTab = self.nextHovered(current: self.hoveredTab, target: tab, isHovering: $0) }
+    }
+
+    func pillChipBackground(selected: Bool, hovered: Bool, tint: Color) -> some View {
+        Capsule(style: .continuous)
+            .fill(
+                selected
+                    ? tint.opacity(MenuBarLayoutTokens.Opacity.tint)
+                    : (hovered ? self.nativeHoverFill : self.cardFillColor.opacity(0.84)))
+            .overlay {
+                Capsule(style: .continuous)
+                    .stroke(
+                        selected
+                            ? tint.opacity(0.22)
+                            : self.cardBorderColor.opacity(hovered ? 0.74 : 0.58),
+                        lineWidth: MenuBarLayoutTokens.stroke)
+            }
+    }
+
+    func modeAccent(for mode: CoreMode) -> Color {
+        switch mode {
+        case .rule:
+            self.nativeAccent
+        case .global:
+            self.nativeInfo
+        case .direct:
+            self.nativePositive
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    final class Coordinator: NSObject {
-        var parent: EqualWidthSegmentedControl
-
-        init(_ parent: EqualWidthSegmentedControl) {
-            self.parent = parent
-        }
-
-        @MainActor @objc func segmentChanged(_ sender: NSSegmentedControl) {
-            let index = sender.selectedSegment
-            guard index >= 0, index < self.parent.labels.count else { return }
-            self.parent.selectedIndex = index
+    func tabAccent(for tab: RootTab) -> Color {
+        switch tab {
+        case .proxy:
+            self.nativeAccent
+        case .rules:
+            self.nativeWarning
+        case .activity:
+            self.nativeTeal
+        case .logs:
+            self.nativePurple
+        case .system:
+            self.nativeIndigo
         }
     }
 }

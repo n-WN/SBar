@@ -14,15 +14,17 @@ extension MenuBarRoot {
                 count: "\(providers.count)")
 
             if providers.isEmpty {
-                emptyCard(tr("ui.empty.proxy_providers"))
+                self.sectionInnerEmptyState(tr("ui.empty.proxy_providers"))
             } else {
-                VStack(spacing: 0) {
+                self.sectionInnerListSurface {
                     SeparatedForEach(data: providers, id: \.self, separator: nativeSeparator) { name in
                         self.proxyProviderRow(name: name, detail: appState.proxyProvidersDetail[name])
                     }
                 }
             }
         }
+        .padding(T.sectionInset)
+        .background(self.sectionCardBackground())
     }
 
     func proxyProviderRow(name: String, detail: ProviderDetail?) -> some View {
@@ -34,7 +36,7 @@ extension MenuBarRoot {
         let total = detail?.subscriptionInfo?.total
         let remaining = ValueFormatter.subscriptionRemaining(total: total, upload: upload, download: download)
         let remainingRatio = ValueFormatter.subscriptionRemainingRatio(total: total, upload: upload, download: download)
-        let quotaTextColumnWidth: CGFloat = 124
+        let quotaTextColumnWidth: CGFloat = 108
         let rowHorizontalPadding = T.space4
         let hovered = hoveredProxyProviderName == name
 
@@ -45,7 +47,7 @@ extension MenuBarRoot {
             label: {
                 VStack(alignment: .leading, spacing: T.space2) {
                     HStack(spacing: T.space6) {
-                        RoundedRectangle(cornerRadius: T.cornerRadius, style: .continuous)
+                        RoundedRectangle(cornerRadius: T.rowRadius, style: .continuous)
                             .fill(nativeTeal.opacity(T.Opacity.tint))
                             .frame(
                                 width: T.rowLeadingIcon,
@@ -120,8 +122,8 @@ extension MenuBarRoot {
                     }
                 }
                 .padding(.horizontal, rowHorizontalPadding)
-                .padding(.vertical, T.space2)
-                .background(nativeHoverRowBackground(hovered))
+                .padding(.vertical, T.space4)
+                .background(nativeHoverRowBackground(hovered, cornerRadius: T.rowRadius))
                 .animation(.easeInOut(duration: 0.14), value: hovered)
             },
             content: { dismiss in
@@ -230,15 +232,22 @@ extension MenuBarRoot {
             }
 
             if groups.isEmpty {
-                emptyCard(tr("ui.empty.proxy_groups"))
+                self.sectionInnerEmptyState(tr("ui.empty.proxy_groups"))
             } else {
-                VStack(spacing: T.space2) {
+                self.sectionInnerListSurface(spacing: 0) {
                     ForEach(groups, id: \.name) { group in
                         self.proxyGroupInlineRow(group)
+                        if group.name != groups.last?.name {
+                            Rectangle()
+                                .fill(self.nativeSeparator)
+                                .frame(height: T.stroke)
+                        }
                     }
                 }
             }
         }
+        .padding(T.sectionInset)
+        .background(self.sectionCardBackground())
     }
 
     func proxyGroupInlineRow(_ group: ProxyGroup) -> some View {
@@ -255,7 +264,7 @@ extension MenuBarRoot {
         let iconURL = self.proxyGroupIconURL(group)
         let hasLeadingIcon = iconURL != nil
         let rowHorizontalPadding = T.space4
-        let rowVerticalPadding: CGFloat = T.space1
+        let rowVerticalPadding: CGFloat = T.space2
         let hovered = hoveredProxyGroupName == group.name
 
         return AttachedPopoverMenu {
@@ -309,10 +318,10 @@ extension MenuBarRoot {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
-            .frame(height: T.compactRowHeight)
+            .frame(height: T.rowHeight)
             .padding(.horizontal, rowHorizontalPadding)
             .padding(.vertical, rowVerticalPadding)
-            .background(nativeHoverRowBackground(hovered))
+            .background(nativeHoverRowBackground(hovered, cornerRadius: T.rowRadius))
             .animation(.easeInOut(duration: 0.14), value: hovered)
         } content: { dismiss in
             self.popoverHeader(name: group.name, count: nodeCount) {
@@ -389,17 +398,19 @@ extension MenuBarRoot {
         @ViewBuilder trailing: () -> some View = { EmptyView() }) -> some View
     {
         HStack(spacing: T.space6) {
-            Image(systemName: symbol)
-                .font(.app(size: T.FontSize.caption, weight: .semibold))
-                .foregroundStyle(nativeTertiaryLabel)
-                .frame(
-                    width: T.rowLeadingIcon,
-                    height: T.rowLeadingIcon,
-                    alignment: .center)
+            RoundedRectangle(cornerRadius: T.cardRadius, style: .continuous)
+                .fill(self.nativeBadgeFill)
+                .frame(width: 24, height: 24)
+                .overlay {
+                    Image(systemName: symbol)
+                        .font(.app(size: T.FontSize.caption, weight: .semibold))
+                        .foregroundStyle(nativeTertiaryLabel)
+                }
 
             Text(title)
-                .font(.app(size: T.FontSize.body, weight: .bold))
+                .font(.app(size: T.FontSize.caption, weight: .bold))
                 .foregroundStyle(nativeTertiaryLabel)
+                .textCase(.uppercase)
 
             if let count {
                 Text(count)

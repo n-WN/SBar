@@ -37,6 +37,8 @@ extension MenuBarRoot {
                         self.connectionRow(conn)
                     }
                 }
+                .padding(MenuBarLayoutTokens.denseSectionInset)
+                .background(self.sectionCardBackground())
             }
         }
     }
@@ -94,7 +96,8 @@ extension MenuBarRoot {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .menuRowPadding(vertical: MenuBarLayoutTokens.space4)
+        .padding(MenuBarLayoutTokens.sectionInset)
+        .background(self.sectionCardBackground())
     }
 
     var activityFilterMenu: some View {

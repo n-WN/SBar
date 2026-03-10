@@ -1,5 +1,65 @@
 import Foundation
 
+enum CoreBinaryKind: String, CaseIterable, Identifiable {
+    case mihomo
+    case singBox = "sing-box"
+
+    var id: String {
+        self.rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .mihomo:
+            "Mihomo"
+        case .singBox:
+            "sing-box"
+        }
+    }
+
+    var supportsEditableRuntimeSettings: Bool {
+        switch self {
+        case .mihomo:
+            true
+        case .singBox:
+            false
+        }
+    }
+
+    var supportsTunRuntimeManagement: Bool {
+        switch self {
+        case .mihomo:
+            true
+        case .singBox:
+            false
+        }
+    }
+
+    var supportsProviderRefresh: Bool {
+        switch self {
+        case .mihomo:
+            true
+        case .singBox:
+            false
+        }
+    }
+}
+
+enum CoreSourcePreference: String, CaseIterable, Identifiable {
+    case appManaged = "app_managed"
+    case systemSingBox = "system_sing_box"
+
+    var id: String {
+        self.rawValue
+    }
+}
+
+enum SystemSingBoxAvailability: Equatable {
+    case unavailable
+    case incompatible(path: String)
+    case available(path: String, version: String?)
+}
+
 enum RuntimeVisualStatus {
     case stopped
     case starting
@@ -34,7 +94,7 @@ enum ConfigLogLevel: String, CaseIterable {
     case debug
 }
 
-enum ConfigPatchValue: Sendable {
+enum ConfigPatchValue {
     case bool(Bool)
     case int(Int)
     case string(String)
@@ -235,7 +295,7 @@ extension EditableSettingsSnapshot {
     }
 }
 
-struct SystemProxyPorts: Equatable, Sendable {
+struct SystemProxyPorts: Equatable {
     let httpPort: Int?
     let httpsPort: Int?
     let socksPort: Int?

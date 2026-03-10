@@ -14,6 +14,10 @@ enum TunModeError: LocalizedError {
 @MainActor
 extension AppState {
     func toggleTunMode(_ enabled: Bool) async {
+        guard self.supportsTunRuntimeManagement else {
+            appendLog(level: "warning", message: tr("app.tun.error.unsupported_for_sing_box"))
+            return
+        }
         guard !isTunSyncing else { return }
         guard enabled != isTunEnabled else { return }
 
@@ -42,6 +46,14 @@ extension AppState {
     }
 
     func prepareTunOverlayForCoreStartup(_ overlay: EditableSettingsSnapshot) async throws -> EditableSettingsSnapshot {
+        guard self.supportsTunRuntimeManagement else {
+            if overlay.tunEnabled {
+                isTunEnabled = false
+                persistEditableSettingsSnapshot()
+            }
+            return overlay.withTunEnabled(false)
+        }
+
         guard overlay.tunEnabled else { return overlay }
 
         do {
@@ -58,6 +70,7 @@ extension AppState {
     }
 
     func validateTunPermissionsOnStartup() async {
+        guard self.supportsTunRuntimeManagement else { return }
         guard isTunEnabled else { return }
         do {
             try await self.ensureTunPermissions(requestIfMissing: false)
@@ -108,17 +121,17 @@ extension AppState {
     }
 
     func resolvedMihomoBinaryPath() -> String? {
+        let current = coreBinaryPath.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !current.isEmpty, current != "-" {
+            return current
+        }
+
         if let detected = processManager.detectedBinaryPath,
            !detected.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         {
             return detected
         }
-
-        let current = mihomoBinaryPath.trimmingCharacters(in: .whitespacesAndNewlines)
-        if current.isEmpty || current == "-" {
-            return nil
-        }
-        return current
+        return nil
     }
 
     func ensureTunPermissions(requestIfMissing: Bool) async throws {
@@ -139,6 +152,7 @@ extension AppState {
     }
 
     func verifyTunAfterOverlayIfNeeded(overlay: EditableSettingsSnapshot) async {
+        guard self.supportsTunRuntimeManagement else { return }
         guard overlay.tunEnabled, isRuntimeRunning else { return }
         guard pendingCoreFeatureRecoveryState == nil else { return }
 
@@ -160,6 +174,7 @@ extension AppState {
     }
 
     func applyTunRuntimeChange(enabled: Bool) async throws {
+        guard self.supportsTunRuntimeManagement else { return }
         guard isRuntimeRunning else { return }
         try await self.patchTunConfig(enable: enabled)
         try await self.verifyTunRuntimeState(expectedEnabled: enabled)
@@ -187,6 +202,7 @@ extension AppState {
     }
 
     func patchTunConfig(enable: Bool) async throws {
+        guard self.supportsTunRuntimeManagement else { return }
         let client = try clientOrThrow()
         var tunBody: [String: JSONValue] = ["enable": .bool(enable)]
 
@@ -202,6 +218,7 @@ extension AppState {
     }
 
     func ensureTunMixedStackOnStartupIfNeeded() async {
+        guard self.supportsTunRuntimeManagement else { return }
         guard self.isRuntimeRunning else { return }
 
         do {
@@ -226,6 +243,7 @@ extension AppState {
     }
 
     func selectedConfigDeclaresTunStack() async -> Bool {
+        guard self.supportsTunRuntimeManagement else { return false }
         guard
             let configPath = await resolveSelectedConfigPath(),
             let raw = try? String(contentsOfFile: configPath, encoding: .utf8)

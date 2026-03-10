@@ -31,6 +31,10 @@ struct WorkingDirectoryManager {
         self.coreDirectoryURL.appendingPathComponent("mihomo", isDirectory: false)
     }
 
+    var managedSingBoxBinaryURL: URL {
+        self.coreDirectoryURL.appendingPathComponent("sing-box", isDirectory: false)
+    }
+
     func bootstrapDirectories(fileManager: FileManager = .default) throws {
         try self.createDirectoryIfNeeded(self.rootDirectoryURL, fileManager: fileManager)
         try self.createDirectoryIfNeeded(self.configDirectoryURL, fileManager: fileManager)

@@ -30,7 +30,7 @@ extension AppState {
             // Keep a core-side sync call so proxy toggle and runtime config stay aligned.
             try await clientOrThrow().requestNoResponse(.patchConfigs(body: ["mode": .string(currentMode.rawValue)]))
 
-            isSystemProxyEnabled = enabled
+            self.assignIfChanged(\.isSystemProxyEnabled, to: enabled)
             let state = enabled ? tr("log.system_proxy.enabled") : tr("log.system_proxy.disabled")
             appendLog(level: "info", message: tr("log.system_proxy.toggled", state))
         } catch {
@@ -72,7 +72,9 @@ extension AppState {
                     timeout: timeout))
             let delays = response.values.filter { $0.value > 0 }
 
-            self.groupLatencies[group.name] = delays
+            if self.groupLatencies[group.name] != delays {
+                self.groupLatencies[group.name] = delays
+            }
         }
     }
 
