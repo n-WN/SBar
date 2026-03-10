@@ -13,7 +13,7 @@ enum AppReleaseService {
         request.timeoutInterval = 8
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
-        request.setValue("SBar/\(currentVersion)", forHTTPHeaderField: "User-Agent")
+        request.setValue("SingBar/\(currentVersion)", forHTTPHeaderField: "User-Agent")
 
         let session = Self.makeSession()
         let (data, response) = try await session.data(for: request)

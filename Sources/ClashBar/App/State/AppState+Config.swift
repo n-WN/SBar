@@ -6,8 +6,8 @@ import UniformTypeIdentifiers
 extension AppState {
     func seedBundledConfigIfNeeded() {
         let seeds = [
-            ("SBar.yaml", "ClashBar.yaml"),
-            ("SBar.json", "SBar.json"),
+            ("SingBar.yaml", "ClashBar.yaml"),
+            ("SingBar.json", "SingBar.json"),
         ]
         let fileManager = FileManager.default
 

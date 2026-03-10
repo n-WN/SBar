@@ -32,7 +32,7 @@ extension MenuBarRoot {
                     .frame(width: 42, height: 42)
 
                     VStack(alignment: .leading, spacing: MenuBarLayoutTokens.space2) {
-                        Text("SBar")
+                        Text("SingBar")
                             .font(.app(size: MenuBarLayoutTokens.FontSize.title, weight: .bold))
                             .foregroundStyle(nativePrimaryLabel)
 

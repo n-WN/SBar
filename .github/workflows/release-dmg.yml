@@ -220,8 +220,8 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: |
-            dist/SBar-${{ needs.prepare-version.outputs.version }}-${{ matrix.dmg_suffix }}.dmg
-            dist/SBar-${{ needs.prepare-version.outputs.version }}-${{ matrix.dmg_suffix }}.dmg.sha256
+            dist/SingBar-${{ needs.prepare-version.outputs.version }}-${{ matrix.dmg_suffix }}.dmg
+            dist/SingBar-${{ needs.prepare-version.outputs.version }}-${{ matrix.dmg_suffix }}.dmg.sha256
           if-no-files-found: error
 
   release:
@@ -257,7 +257,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare-version.outputs.tag }}
-          name: SBar ${{ needs.prepare-version.outputs.version }}
+          name: SingBar ${{ needs.prepare-version.outputs.version }}
           body_path: release.md
           generate_release_notes: true
           fail_on_unmatched_files: true

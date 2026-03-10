@@ -9,7 +9,7 @@
 "ui.log_filter.warning" = "Warning";
 "ui.log_filter.error" = "Error";
 "ui.log_source.all" = "All Sources";
-"ui.log_source.clashbar" = "SBar";
+"ui.log_source.clashbar" = "SingBar";
 "ui.log_source.mihomo" = "Mihomo";
 
 "ui.header.status.running" = "Running";
@@ -172,20 +172,20 @@
 "app.settings.error.save_failed" = "%@ save failed: %@";
 "app.settings.overlay_success" = "Local settings preserved and applied over current config";
 "app.launch_at_login.error.unsupported_environment" = "Launch at login can only be enabled from the packaged .app build";
-"app.launch_at_login.error.requires_approval" = "Allow SBar in System Settings > General > Login Items";
+"app.launch_at_login.error.requires_approval" = "Allow SingBar in System Settings > General > Login Items";
 "app.launch_at_login.error.register_failed" = "Failed to enable launch at login: %@";
 "app.launch_at_login.error.unregister_failed" = "Failed to disable launch at login: %@";
 "app.system_proxy.error.invalid_host" = "Invalid proxy host";
 "app.system_proxy.error.invalid_port" = "Invalid proxy port";
 "app.system_proxy.error.helper_not_bundled" = "Privileged helper not found in app bundle. Use the packaged .app/.dmg build";
-"app.system_proxy.error.helper_install_location" = "Move SBar.app to /Applications and reopen it before enabling system proxy";
-"app.system_proxy.error.helper_needs_approval" = "Allow SBar background item in System Settings > General > Login Items, then try again";
+"app.system_proxy.error.helper_install_location" = "Move SingBar.app to /Applications and reopen it before enabling system proxy";
+"app.system_proxy.error.helper_needs_approval" = "Allow SingBar background item in System Settings > General > Login Items, then try again";
 "app.system_proxy.error.helper_registration_failed" = "Failed to register privileged helper: %@";
 "app.system_proxy.error.helper_recovery_failed" = "Failed to recover privileged helper: %@";
 "app.system_proxy.error.helper_connection_failed" = "Failed to connect privileged helper: %@";
 "app.system_proxy.error.helper_operation_failed" = "Privileged helper operation failed: %@";
 "app.tun.error.binary_not_found" = "No mihomo core was found. Copy an executable named \"mihomo\" to %@ first.";
-"app.tun.error.unsupported_for_sing_box" = "TUN runtime control is currently unavailable for sing-box in SBar.";
+"app.tun.error.unsupported_for_sing_box" = "TUN runtime control is currently unavailable for sing-box in SingBar.";
 "app.tun.error.permission_missing" = "TUN mode requires root + setuid permissions on mihomo binary.";
 "app.tun.error.authorization_cancelled" = "Administrator authorization was cancelled.";
 "app.tun.error.authorization_failed" = "Failed to grant TUN permissions: %@";
@@ -223,12 +223,12 @@
 "app.core.alert.start_failed.title" = "Core Start Failed";
 "app.core.alert.restart_failed.title" = "Core Restart Failed";
 "app.core.alert.process_terminated.title" = "Core Terminated Unexpectedly";
-"app.core.error.binary_not_found" = "No app-managed core was found. Copy an executable named \"sing-box\" or \"mihomo\" to %@, then start SBar Core again.";
+"app.core.error.binary_not_found" = "No app-managed core was found. Copy an executable named \"sing-box\" or \"mihomo\" to %@, then start SingBar Core again.";
 "app.core.error.system_sing_box_not_found" = "No compatible system sing-box was found. Install the Homebrew build or add a build with Clash API support.";
 "app.core.error.system_sing_box_missing_clash_api" = "The detected system sing-box does not include Clash API support:\n%@";
 "app.core.error.system_sing_box_requires_json" = "sing-box requires a JSON config file.\n\nCurrent file:\n%@";
 "app.core.setup_required.title" = "Install Core";
-"app.core.setup_required.message" = "This build does not bundle a managed core. Before first use, copy an executable named \"sing-box\" or \"mihomo\" into:\n%@\n\nSBar will load the core from that folder.";
+"app.core.setup_required.message" = "This build does not bundle a managed core. Before first use, copy an executable named \"sing-box\" or \"mihomo\" into:\n%@\n\nSingBar will load the core from that folder.";
 
 "log.process.terminated" = "Core terminated with code %d";
 "log.working_dir_init_failed" = "Failed to initialize working directory: %@";

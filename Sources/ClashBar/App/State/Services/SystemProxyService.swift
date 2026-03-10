@@ -23,7 +23,7 @@ enum SystemProxyServiceError: LocalizedError {
             "Privileged helper not found in app bundle. Please rebuild and run the packaged app."
         case .helperRequiresInstallToApplications:
             "Privileged helper can only be installed from /Applications. " +
-                "Move SBar.app to /Applications and reopen it."
+                "Move SingBar.app to /Applications and reopen it."
         case .helperNeedsApproval:
             "Privileged helper requires approval in System Settings > Login Items."
         case let .helperRegistrationFailed(message):

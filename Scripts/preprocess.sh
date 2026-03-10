@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="${APP_NAME:-SBar}"
+APP_NAME="${APP_NAME:-SingBar}"
 TARGET_ARCH="${TARGET_ARCH:-}"
 MIHOMO_REPO="${MIHOMO_REPO:-MetaCubeX/mihomo}"
 MIHOMO_VERSION="${MIHOMO_VERSION:-}"
@@ -152,7 +152,7 @@ prepare_icon() {
 
   local iconset_work_dir
   local iconset_dir
-  iconset_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/sbar.iconset.XXXXXX")"
+  iconset_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/singbar.iconset.XXXXXX")"
   iconset_dir="${iconset_work_dir}.iconset"
   mv "$iconset_work_dir" "$iconset_dir"
 

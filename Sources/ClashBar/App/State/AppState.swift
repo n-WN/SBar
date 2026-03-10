@@ -551,7 +551,7 @@ final class AppState: ObservableObject {
     }
 
     private static func resolveBundledManagedCoreFlag() -> Bool {
-        let infoKeys = ["SBarBundlesManagedCore", "ClashBarBundlesMihomoCore"]
+        let infoKeys = ["SingBarBundlesManagedCore", "SBarBundlesManagedCore", "ClashBarBundlesMihomoCore"]
         let value = infoKeys
             .lazy
             .compactMap { Bundle.main.object(forInfoDictionaryKey: $0) }

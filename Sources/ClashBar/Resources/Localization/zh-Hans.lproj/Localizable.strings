@@ -9,7 +9,7 @@
 "ui.log_filter.warning" = "警告";
 "ui.log_filter.error" = "错误";
 "ui.log_source.all" = "全部来源";
-"ui.log_source.clashbar" = "SBar";
+"ui.log_source.clashbar" = "SingBar";
 "ui.log_source.mihomo" = "Mihomo";
 
 "ui.header.status.running" = "运行中";
@@ -172,20 +172,20 @@
 "app.settings.error.save_failed" = "%@ 保存失败: %@";
 "app.settings.overlay_success" = "已保留设置并覆盖当前配置";
 "app.launch_at_login.error.unsupported_environment" = "仅可在 .app 包内启用开机自启，请运行打包后的应用";
-"app.launch_at_login.error.requires_approval" = "需要在系统设置 > 通用 > 登录项中允许 SBar";
+"app.launch_at_login.error.requires_approval" = "需要在系统设置 > 通用 > 登录项中允许 SingBar";
 "app.launch_at_login.error.register_failed" = "开启开机自启失败: %@";
 "app.launch_at_login.error.unregister_failed" = "关闭开机自启失败: %@";
 "app.system_proxy.error.invalid_host" = "代理地址无效";
 "app.system_proxy.error.invalid_port" = "代理端口无效";
 "app.system_proxy.error.helper_not_bundled" = "未找到系统代理 helper。请使用打包后的应用（.app/.dmg）";
-"app.system_proxy.error.helper_install_location" = "请先将 SBar.app 拖到“应用程序”目录后重试";
-"app.system_proxy.error.helper_needs_approval" = "需要在系统设置 > 通用 > 登录项中允许 SBar 后台项目，然后重试";
+"app.system_proxy.error.helper_install_location" = "请先将 SingBar.app 拖到“应用程序”目录后重试";
+"app.system_proxy.error.helper_needs_approval" = "需要在系统设置 > 通用 > 登录项中允许 SingBar 后台项目，然后重试";
 "app.system_proxy.error.helper_registration_failed" = "注册系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_recovery_failed" = "恢复系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_connection_failed" = "连接系统代理 helper 失败: %@";
 "app.system_proxy.error.helper_operation_failed" = "系统代理 helper 执行失败: %@";
 "app.tun.error.binary_not_found" = "未找到 mihomo 二进制。请先将名为“mihomo”的可执行文件复制到以下目录：\n%@";
-"app.tun.error.unsupported_for_sing_box" = "SBar 当前暂不支持 sing-box 的 TUN 运行时控制。";
+"app.tun.error.unsupported_for_sing_box" = "SingBar 当前暂不支持 sing-box 的 TUN 运行时控制。";
 "app.tun.error.permission_missing" = "TUN 模式需要 mihomo 二进制具备 root + setuid 权限。";
 "app.tun.error.authorization_cancelled" = "管理员授权已取消。";
 "app.tun.error.authorization_failed" = "授予 TUN 权限失败: %@";
@@ -223,12 +223,12 @@
 "app.core.alert.start_failed.title" = "启动内核失败";
 "app.core.alert.restart_failed.title" = "重启内核失败";
 "app.core.alert.process_terminated.title" = "内核异常退出";
-"app.core.error.binary_not_found" = "未找到应用托管内核。请先将名为“sing-box”或“mihomo”的可执行文件复制到以下目录，再重新启动 SBar Core：\n%@";
+"app.core.error.binary_not_found" = "未找到应用托管内核。请先将名为“sing-box”或“mihomo”的可执行文件复制到以下目录，再重新启动 SingBar Core：\n%@";
 "app.core.error.system_sing_box_not_found" = "未找到兼容的系统 sing-box。请安装 Homebrew 版本，或提供带 Clash API 支持的构建。";
 "app.core.error.system_sing_box_missing_clash_api" = "检测到的系统 sing-box 不包含 Clash API 支持：\n%@";
 "app.core.error.system_sing_box_requires_json" = "sing-box 需要 JSON 配置文件。\n\n当前文件：\n%@";
 "app.core.setup_required.title" = "安装内核";
-"app.core.setup_required.message" = "当前版本不内置托管内核。首次使用前，请将名为“sing-box”或“mihomo”的可执行文件复制到以下目录：\n%@\n\nSBar 之后会从该目录读取内核。";
+"app.core.setup_required.message" = "当前版本不内置托管内核。首次使用前，请将名为“sing-box”或“mihomo”的可执行文件复制到以下目录：\n%@\n\nSingBar 之后会从该目录读取内核。";
 
 "log.process.terminated" = "内核已退出，退出码 %d";
 "log.working_dir_init_failed" = "初始化工作目录失败: %@";

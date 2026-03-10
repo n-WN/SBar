@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="${APP_NAME:-SBar}"
+APP_NAME="${APP_NAME:-SingBar}"
 BUNDLE_ID="${BUNDLE_ID:-com.clashbar}"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
@@ -206,6 +206,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <key>CFBundleShortVersionString</key><string>${APP_VERSION}</string>
 <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
 $ICON_PLIST_ENTRY
+<key>SingBarBundlesManagedCore</key>${BUNDLES_MIHOMO_CORE_PLIST_VALUE}
 <key>SBarBundlesManagedCore</key>${BUNDLES_MIHOMO_CORE_PLIST_VALUE}
 <key>ClashBarBundlesMihomoCore</key>${BUNDLES_MIHOMO_CORE_PLIST_VALUE}
 <key>NSAppTransportSecurity</key>

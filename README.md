@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="Sources/ClashBar/Resources/Brand/menu_icon.png" width="300" alt="SBar Logo" />
+<img src="Sources/ClashBar/Resources/Brand/menu_icon.png" width="300" alt="SingBar Logo" />
 
-# SBar
+# SingBar
 
 原生 macOS 菜单栏代理客户端（SwiftUI + AppKit），支持 `sing-box` / `mihomo` Core，默认推荐 `sing-box`。
 
@@ -32,23 +32,23 @@
 
 </div>
 
-<img src="./imgs/sbar.png" alt="SBar" height="520" />
+<img src="./imgs/sbar.png" alt="SingBar" height="520" />
 
 ---
 
 ## 👋 项目简介
 
-SBar 是一款面向 macOS 的原生菜单栏代理客户端，支持 `sing-box` / `mihomo` Core，聚焦于「轻量入口、稳定运行、可观测运维」。  
+SingBar 是一款面向 macOS 的原生菜单栏代理客户端，支持 `sing-box` / `mihomo` Core，聚焦于「轻量入口、稳定运行、可观测运维」。  
 在不打开复杂主窗口的前提下，你可以在菜单栏中完成配置管理、节点切换、规则刷新、连接排障与系统代理控制。 ✨
 
 ## 🤖 项目说明
 
-SBar 是一个「纯 AI vibe coding」驱动的自用项目。  
+SingBar 是一个「纯 AI vibe coding」驱动的自用项目。  
 项目在需求整理、实现迭代、文档维护等环节持续与 Codex 协作，以更快验证想法并沉淀可复用实践。 🚀
 
 ## 🎯 项目初心
 
-SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
+SingBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
 - 🪶 轻量化优先：在打包 Core 的前提下，应用体积目标控制在 **40 MB 以内**。
 - 📦 可裁剪交付：移除 Core 后，应用体积目标控制在 **10 MB 以内**，便于快速分发与集成。
@@ -80,7 +80,7 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
 ## 🚀 快速上手（用户）
 
-1. 点击菜单栏图标打开 SBar 面板。 🖱️
+1. 点击菜单栏图标打开 SingBar 面板。 🖱️
 2. 在 `Proxy` 页面选择配置，或导入本地/远程配置。 📥
 3. 点击 `Start` 启动 Core，必要时执行 `Restart`。 ▶️
 4. 选择代理模式：`Rule` / `Global` / `Direct`。 🎛️
@@ -106,10 +106,11 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 
 运行时根目录：
 
+- `~/Library/Application Support/singbar`
+
+兼容旧版本（启动时会自动迁移旧目录内容）：
+
 - `~/Library/Application Support/sbar`
-
-兼容旧版本（若检测到旧目录则继续使用）：
-
 - `~/Library/Application Support/clashbar`
 
 目录结构与职责：
@@ -128,27 +129,28 @@ SBar 的设计目标始终围绕两个关键词：**轻量** 与 **稳定**。
 - 未手动指定时，默认选中首个配置
 
 > [!TIP]
-> 建议只对 `config/` 做日常维护，其余目录优先交由 SBar 管理，以降低运行状态不一致风险。
+> 建议只对 `config/` 做日常维护，其余目录优先交由 SingBar 管理，以降低运行状态不一致风险。
 
 ## 🔄 内核目录与切换
 
 运行时内核路径：
 
-- `~/Library/Application Support/sbar/core`
+- `~/Library/Application Support/singbar/core`
 
 如果你使用的是「内置 Core」版本，首次启动会将应用内置 Core 复制到上述目录。后续运行统一使用该路径，避免改写已签名的 app bundle。
 
 切换内核步骤：
 
-1. 在 SBar 中执行 `Stop`，确保当前内核进程已停止。
+1. 在 SingBar 中执行 `Stop`，确保当前内核进程已停止。
 2. 准备目标内核可执行文件（如 `sing-box` / `mihomo`，命名需要保持一致）。
-3. 返回 SBar，执行 `Start` 或 `Restart`。
+3. 返回 SingBar，执行 `Start` 或 `Restart`。
 
 异常处理：
 
 - 若切换后出现缓存兼容问题，可清理缓存后重试：
 
 ```bash
+rm -f "$HOME/Library/Application Support/singbar/cache.db"
 rm -f "$HOME/Library/Application Support/sbar/cache.db"
 rm -f "$HOME/Library/Application Support/clashbar/cache.db"
 ```
@@ -164,12 +166,12 @@ rm -f "$HOME/Library/Application Support/clashbar/cache.db"
 
 **处理步骤**
 
-1. 将应用放置到 `/Applications/SBar.app`。
+1. 将应用放置到 `/Applications/SingBar.app`。
 2. 打开 **系统设置 → 隐私与安全性**，点击「仍要打开（Open Anyway）」。
 3. 若仍被拦截，可移除隔离标记后重试：
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
+sudo xattr -r -d com.apple.quarantine /Applications/SingBar.app
 ```
 
 ### 2) 系统代理开启失败 ⚙️
@@ -180,7 +182,7 @@ sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
 **处理步骤**
 
 1. 确认使用的是打包后的应用，并位于 `/Applications`。
-2. 在 macOS 系统设置中完成 SBar 相关权限批准。
+2. 在 macOS 系统设置中完成 SingBar 相关权限批准。
 3. 回到应用执行一次 `Restart` Core 后再次开启系统代理。
 4. 如仍失败，打开 `Logs` 检查关键错误并提交 Issue。
 

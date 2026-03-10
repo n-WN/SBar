@@ -111,7 +111,7 @@ final class StatusItemContentView: NSView {
                 previousSymbolName != symbolName ||
                 self.currentDisplay?.mode != previousMode
             {
-                let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "SBar")
+                let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "SingBar")
                 let config = NSImage.SymbolConfiguration(pointSize: self.symbolPointSize, weight: .semibold)
                 self.iconView.image = image?.withSymbolConfiguration(config)
             }

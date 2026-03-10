@@ -115,7 +115,9 @@ extension AppState {
         }
 
         let nonTemplateConfigs = jsonConfigs.filter {
-            $0.lastPathComponent.caseInsensitiveCompare("SBar.json") != .orderedSame
+            let name = $0.lastPathComponent
+            return name.caseInsensitiveCompare("SingBar.json") != .orderedSame &&
+                name.caseInsensitiveCompare("SBar.json") != .orderedSame
         }
         let candidates = nonTemplateConfigs.isEmpty ? jsonConfigs : nonTemplateConfigs
 

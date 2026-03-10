@@ -51,8 +51,8 @@ ${changelog_section}
 
 ## 下载地址
 
-- Apple Silicon（内置 Mihomo）: [SBar-${version}-apple-silicon.dmg](${download_base}/SBar-${version}-apple-silicon.dmg)
-- Apple Silicon（无内核）: [SBar-${version}-apple-silicon-no-core.dmg](${download_base}/SBar-${version}-apple-silicon-no-core.dmg)
-- Intel（内置 Mihomo）: [SBar-${version}-intel.dmg](${download_base}/SBar-${version}-intel.dmg)
-- Intel（无内核）: [SBar-${version}-intel-no-core.dmg](${download_base}/SBar-${version}-intel-no-core.dmg)
+- Apple Silicon（内置 Mihomo）: [SingBar-${version}-apple-silicon.dmg](${download_base}/SingBar-${version}-apple-silicon.dmg)
+- Apple Silicon（无内核）: [SingBar-${version}-apple-silicon-no-core.dmg](${download_base}/SingBar-${version}-apple-silicon-no-core.dmg)
+- Intel（内置 Mihomo）: [SingBar-${version}-intel.dmg](${download_base}/SingBar-${version}-intel.dmg)
+- Intel（无内核）: [SingBar-${version}-intel-no-core.dmg](${download_base}/SingBar-${version}-intel-no-core.dmg)
 EOF

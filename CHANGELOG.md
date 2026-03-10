@@ -2,7 +2,7 @@
 
 ### ✨ 新增功能
 
-- 应用品牌重命名为 SBar，菜单栏图标更新为 sing-box 风格
+- 应用品牌重命名为 SingBar，菜单栏图标更新为 sing-box 风格
 - 支持检测系统安装的 sing-box 作为 Core（用于无内置内核版本）
 - 新增 sing-box JSON 配置模板（过渡）
 
@@ -14,8 +14,8 @@
 
 ### 🧰 构建与发布
 
-- Release DMG 产物命名与下载链接统一为 SBar
-- 修复打包后的 app bundle 可执行文件名仍为 ClashBar 的问题（进程名显示为 SBar）
+- Release DMG 产物命名与下载链接统一为 SingBar
+- 修复打包后的 app bundle 可执行文件名仍为 ClashBar 的问题（进程名显示为 SingBar）
 
 ## v0.1.5
 

@@ -25,7 +25,7 @@ let package = Package(
                 .copy("Resources/bin"),
                 .copy("Resources/Brand"),
                 .copy("Resources/ConfigTemplates/ClashBar.yaml"),
-                .copy("Resources/ConfigTemplates/SBar.json"),
+                .copy("Resources/ConfigTemplates/SingBar.json"),
                 .process("Resources/Localization"),
             ]),
         .executableTarget(

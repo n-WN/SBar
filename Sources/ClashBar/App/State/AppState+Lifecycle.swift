@@ -204,7 +204,7 @@ extension AppState {
         let app = NSApplication.shared
         switch appearanceMode {
         case .system:
-            app.appearance = NSAppearance(named: .aqua)
+            app.appearance = nil
         case .light:
             app.appearance = NSAppearance(named: .aqua)
         case .dark:
