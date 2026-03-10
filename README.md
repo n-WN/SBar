@@ -20,19 +20,19 @@
   <a href="https://github.com/n-WN/SBar/issues" target="_blank" rel="noopener noreferrer">
     <img alt="Issues" src="https://img.shields.io/github/issues/n-WN/SBar?style=flat-square&logo=github" />
   </a>
-  <a href="https://t.me/clashbars" target="_blank" rel="noopener noreferrer">
+  <!-- <a href="https://t.me/clashbars" target="_blank" rel="noopener noreferrer">
     <img alt="Telegram" src="https://img.shields.io/badge/Telegram-@clashbars-26A5E4?style=flat-square&logo=telegram&logoColor=white" />
-  </a>
+  </a> -->
 </p>
 
-<p>
+<!-- <p>
   <strong>加入 Telegram 群获取更新与支持：</strong>
   <a href="https://t.me/clashbars" target="_blank" rel="noopener noreferrer">@clashbars</a>
-</p>
+</p> -->
 
 </div>
 
-![SBar](./imgs/sbar.png)
+<img src="./imgs/sbar.png" alt="SBar" height="520" />
 
 ---
 
@@ -219,7 +219,7 @@ sudo xattr -r -d com.apple.quarantine /Applications/SBar.app
 
 ## 🙌 反馈与支持
 
-- Telegram 社区：<https://t.me/clashbars>
+<!-- - Telegram 社区：<https://t.me/clashbars> -->
 - Issue / PR：欢迎提交功能建议、稳定性问题与文档修正。 💬
 
 ## 👥 贡献者
